@@ -65,9 +65,11 @@ class Dataset:
                     columna=self._elementos.keys().index(pelicula)
                     dict_valoracion[pelicula]=valoracion_usuario
                     repeticion=input("¿Quiere valorar otra película?(s/n):")
-            nuevo_usuario=np.zeros(size[1])  
+            nuevo_usuario=np.zeros(size[1])
+            self._valoraciones=np.append(self._valoraciones, [nuevo_usuario])
+            new_size=self._valoraciones.size()
             for columna, valoracion in dict_valoracion.values():
-                nuevo_usuario[1,columna]=valoracion
+                self._valoraciones[new_size(0),columna]=valoracion
                 score=self.score_top_popular_items(min_votos, columna)
                 score_dict[pelicula]=score
             score_dict = sorted(score_dict.items(), key=lambda x: x[1])
