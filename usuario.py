@@ -3,9 +3,7 @@
 Created on Wed Apr 20 13:01:16 2022
 
 @author: Joel Tapia Salvador
-"""
-# -*- coding: utf-8 -*-
-"""
+
 Created on Wed Apr 27 17:08:55 2022
 
 @author: marcs
@@ -13,21 +11,37 @@ Created on Wed Apr 27 17:08:55 2022
 from dataclasses import dataclass, field
 from typing import List, Dict
 from datetime import date, datetime, timedelta
-from abc import ABCMeta, abstractmethod
 
+
+@dataclass
 class Usuari:
-    def __init__(self):
-        self._index=0
-        self._ident=""
+    _nom: str
+    _fila: int
+    _gustos: Dict[str, List[str]] = field(init=False, default_factory=dict)
+
     @property
-    def index(self):
-        return self._index
-    @index.setter
-    def index(self, valor):
-        self._index=valor
+    def nom(self):
+        return self._nom
+
+    @nom.setter
+    def nom(self, nom):
+        self._nom = nom
+
     @property
-    def ident(self):
-        return self._index
-    @ident.setter
-    def ident(self, valor):
-        self._ident=valor
+    def fila(self):
+        return self._fila
+
+    @fila.setter
+    def fila(self, fila):
+        self._fila = fila
+
+    @property
+    def gustos(self):
+        return self._gustos
+
+    @gustos.setter
+    def gustos(self, valor):
+        if isinstance(valor, dict):
+            self._gustos = valor
+        else:
+            raise TypeError
