@@ -42,57 +42,65 @@ class Dataset(metaclass=ABCMeta):
     def elementos(self):
         return self._elementos
 
-    def score_top_popular_items(self, min_votos, columna):
-        size = self._valoraciones.size()
-        recuento = 0
-        suma = 0
-        for i in range(size[1]):
-            if self._valoraciones[columna, i] != 0:
-                recuento += 1
-                suma += self._valoraciones[columna, i]
-        media_global = suma / size[1]
-        media = suma / recuento
-        score = (recuento / (recuento + min_votos) * media) + (
-            min_votos / (recuento + min_votos) * media_global
-        )
-        return score
-
-    def top_popular_items(self, min_votos):
-        score_dict = {}
-        repeticion = "s"
-        print("Elija una opción")
-        print("Opción 1: listado de recomendaciones.")
-        print("Opción 2: añadir valoraciones.")
-        opcion = input()
-        if opcion == 1:
-            for elemento in self._elementos:
-                size = self._valoraciones.size()
-                for columna in range(size[0]):
-                    score = self.score_top_popular_items(min_votos, columna)
-                    score_dict[elemento] = score
-            score_dict = sorted(score_dict.items(), key=lambda x: x[1])
-            return score_dict
-        elif opcion == 2:
-            dict_valoracion = {}
-            repeticion = "s"
-            while repeticion == "s":
-                pelicula = input("Introduzca el titulo de la película: ")
-                if pelicula not in self._elementos.keys():
-                    raise AssertionError("Película no disponible")
+    def top_popular_items (self, min_votos, usuario):
+        score_dict={}
+        # print("Elija una opción")
+        # print("Opción 1: listado de recomendaciones.")
+        # print("Opción 2: añadir valoraciones.")        
+        # opcion=input()
+        medias=[]
+        votos=[]
+        valoraciones=[]
+        size=self._valoraciones.size()
+        print(size)
+        for columna in range(size[0]):
+            print(1)
+            recuento=0
+            suma=0
+            for i in range(size[1]):
+                if self._valoraciones[columna, i]!=0:
+                    recuento+=1
+                    suma+=self._valoraciones[columna, i]
+                    print(2)
+            votos.append(recuento)
+            if recuento<min_votos:
+                media=0
+                medias.append(media)
+            else:
+                media=suma/recuento
+                medias.append(media)
+                    
+            media_global=(sum(medias))/len(medias)
+            
+            for recuento, media in zip(votos, medias):
+                if media==0:
+                    score=0
                 else:
-                    valoracion_usuario = float(input("Introduzca su valoración: "))
-                    columna = self._elementos.keys().index(pelicula)
-                    dict_valoracion[pelicula] = valoracion_usuario
-                    repeticion = input("¿Quiere valorar otra película?(s/n):")
-            nuevo_usuario = np.zeros(size[1])
-            self._valoraciones = np.append(self._valoraciones, [nuevo_usuario])
-            new_size = self._valoraciones.size()
-            for columna, valoracion in dict_valoracion.values():
-                self._valoraciones[new_size(0), columna] = valoracion
-                score = self.score_top_popular_items(min_votos, columna)
-                score_dict[pelicula] = score
+                    score=(recuento/(recuento+min_votos)*media)+(min_votos/(recuento+min_votos)*media_global)
+                valoraciones.append(score)
+            for elemento, score in zip(self._elementos, valoraciones):
+                score_dict[elemento]=score
             score_dict = sorted(score_dict.items(), key=lambda x: x[1])
             return score_dict
+            
+        # elif opcion==2:
+        #     dict_valoracion={}
+        #     repeticion="s"
+        #     while repeticion=="s":
+        #         pelicula=input("Introduzca el titulo de la película: ")
+        #         if pelicula not in self._elementos.keys():
+        #             raise AssertionError("Película no disponible")
+        #         else:
+        #             valoracion_usuario=float(input("Introduzca su valoración: "))
+        #             columna=self._elementos.keys().index(pelicula)
+        #             dict_valoracion[pelicula]=valoracion_usuario
+        #             repeticion=input("¿Quiere valorar otra película?(s/n):")
+        #     nuevo_usuario=np.zeros(size[1])  
+        #     for columna, valoracion in dict_valoracion.values():
+        #         nuevo_usuario[1,columna]=valoracion
+        #         score=self.score_top_popular_items(min_votos, columna)
+        #         score_dict[pelicula]=score
+        #     score_dict = sorted(score_dict.items(), key=lambda x: x[1])
 
     @abstractmethod
     def read_data(self, directory: str, names_files: List[str]):
