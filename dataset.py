@@ -42,7 +42,7 @@ class Dataset(metaclass=ABCMeta):
     def elementos(self):
         return self._elementos
 
-    def top_popular_items (self, min_votos, usuario):
+        def top_popular_items (self, min_votos, usuario):
         score_dict={}
         # print("Elija una opción")
         # print("Opción 1: listado de recomendaciones.")
@@ -51,17 +51,15 @@ class Dataset(metaclass=ABCMeta):
         medias=[]
         votos=[]
         valoraciones=[]
-        size=self._valoraciones.size()
-        print(size)
-        for columna in range(size[0]):
-            print(1)
+        size=self._valoraciones.shape
+        for columna in range(size[1]):
             recuento=0
             suma=0
-            for i in range(size[1]):
-                if self._valoraciones[columna, i]!=0:
+            for i in range(size[0]):
+                if self._valoraciones[i, columna]!=0:
                     recuento+=1
-                    suma+=self._valoraciones[columna, i]
-                    print(2)
+                    suma+=self._valoraciones[i, columna]
+                    
             votos.append(recuento)
             if recuento<min_votos:
                 media=0
@@ -72,17 +70,34 @@ class Dataset(metaclass=ABCMeta):
                     
             media_global=(sum(medias))/len(medias)
             
-            for recuento, media in zip(votos, medias):
-                if media==0:
-                    score=0
-                else:
-                    score=(recuento/(recuento+min_votos)*media)+(min_votos/(recuento+min_votos)*media_global)
-                valoraciones.append(score)
-            for elemento, score in zip(self._elementos, valoraciones):
-                score_dict[elemento]=score
-            score_dict = sorted(score_dict.items(), key=lambda x: x[1])
-            return score_dict
+        for recuento, media in zip(votos, medias):
+            if media==0:
+                 score=0
+            else:
+                score=(recuento/(recuento+min_votos)*media)+(min_votos/(recuento+min_votos)*media_global)
+            valoraciones.append(score)
+
+        for score, index in zip(valoraciones, range(size[1]-1)):       
+            titulo=(self._elementos[0][index]._titol)
+            score_dict[titulo]=score
+        # score_dict = sorted(score_dict.items(), key=lambda x: x[1])
+        valoraciones_usuario=self._valoraciones[usuario,:]
+        indices=[]
+        rec_usuario={}
+        for nota, columna in zip(valoraciones_usuario, range(valoraciones_usuario.size - 1)):
+            if nota==0:
+                indices.append(columna)
+        print(len(list(score_dict.keys())))
+        # for index in indices:
+        #     titol=list(score_dict.keys())
+        #     titol=titol[index]
+        #     rec_usuario[titol]=score_dict[titol]
+        # rec_usuario = sorted(rec_usuario.items(), key=lambda x: x[1], reverse=True)
+                
+                
             
+        return score_dict
+        
         # elif opcion==2:
         #     dict_valoracion={}
         #     repeticion="s"
