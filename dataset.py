@@ -7,7 +7,6 @@ Created on Wed Apr 20 13:00:34 2022
 from dataclasses import dataclass, field
 from typing import Dict, Tuple, List
 from abc import ABCMeta, abstractmethod
-import numpy as np
 import csv
 from scipy.sparse import lil_matrix
 from data import Data, Pelicula, Game
@@ -18,8 +17,6 @@ import sys
 
 # Matriu que guarda de forma efectiva molts zeros, basada en numpy, una vegada
 # creada es s'utilitza com numpy.
-
-a = lil_matrix(1000, 1000)
 
 logging.basicConfig(
     filename="log.txt",
@@ -178,7 +175,6 @@ class Pelicules(Dataset):
             ) as csv_file:
                 csvreader = csv.reader(csv_file)
                 fields = next(csvreader)
-                zero_array = np.zeros((self._columnas))
                 prev_usuari_nom = None
                 prev_usuari_fila = None
                 prev_elem_colum = None
@@ -191,29 +187,27 @@ class Pelicules(Dataset):
                         self._usuarios[1][row[0]] = self._usuarios[0][self._filas]
                         self._filas += 1
                         if self._valoraciones is None:
-                            self._valoraciones = zero_array
+                            self._valoraciones = lil_matrix((1, self._columnas))
                         else:
-                            self._valoraciones = np.vstack(
-                                [self._valoraciones, zero_array]
-                            )
-                    if len(self._valoraciones.shape) == 1:
-                        self._valoraciones[self._elementos[2][row[1]].columna] = float(
-                            row[2]
-                        )
+                            self._valoraciones.resize((self._filas + 1, self._columnas))
+                    # if len(self._valoraciones.shape) == 1:
+                    #     self._valoraciones[self._elementos[2][row[1]].columna] = float(
+                    #         row[2]
+                    #     )
+                    # else:
+                    if prev_usuari_nom == row[0]:
+                        fila = prev_usuari_fila
                     else:
-                        if prev_usuari_nom == row[0]:
-                            fila = prev_usuari_fila
-                        else:
-                            prev_usuari_nom = row[0]
-                            fila = self._usuarios[1][row[0]].fila
-                            prev_usuari_fila = fila
-                        if prev_elem_iden == row[1]:
-                            columna = prev_elem_colum
-                        else:
-                            prev_elem_iden == row[1]
-                            columna = self._elementos[2][row[1]].columna
-                            prev_elem_colum = columna
-                        self._valoraciones[fila, columna] = float(row[2])
+                        prev_usuari_nom = row[0]
+                        fila = self._usuarios[1][row[0]].fila
+                        prev_usuari_fila = fila
+                    if prev_elem_iden == row[1]:
+                        columna = prev_elem_colum
+                    else:
+                        prev_elem_iden == row[1]
+                        columna = self._elementos[2][row[1]].columna
+                        prev_elem_colum = columna
+                    self._valoraciones[fila, columna] = float(row[2])
             logging.debug("S'ha finalitzat la lectura de la database.")
         except:
             exc_tuple = sys.exc_info()
@@ -300,7 +294,6 @@ class Board_Games(Dataset):
             ) as csv_file:
                 csvreader = csv.reader(csv_file)
                 fields = next(csvreader)
-                zero_array = np.zeros((self._columnas))
                 prev_usuari_nom = None
                 prev_usuari_fila = None
                 prev_elem_colum = None
@@ -313,29 +306,27 @@ class Board_Games(Dataset):
                         self._usuarios[1][row[2]] = self._usuarios[0][self._filas]
                         self._filas += 1
                         if self._valoraciones is None:
-                            self._valoraciones = zero_array
+                            self._valoraciones = lil_matrix((1, self._columnas))
                         else:
-                            self._valoraciones = np.vstack(
-                                [self._valoraciones, zero_array]
-                            )
-                    if len(self._valoraciones.shape) == 1:
-                        self._valoraciones[self._elementos[2][row[0]].columna] = float(
-                            row[1]
-                        )
+                            self._valoraciones.resize((self._filas + 1, self._columnas))
+                    # if len(self._valoraciones.shape) == 1:
+                    #     self._valoraciones[self._elementos[2][row[0]].columna] = float(
+                    #         row[1]
+                    #     )
+                    # else:
+                    if prev_usuari_nom == row[2]:
+                        fila = prev_usuari_fila
                     else:
-                        if prev_usuari_nom == row[2]:
-                            fila = prev_usuari_fila
-                        else:
-                            prev_usuari_nom = row[2]
-                            fila = self._usuarios[1][row[2]].fila
-                            prev_usuari_fila = fila
-                        if prev_elem_iden == row[0]:
-                            columna = prev_elem_colum
-                        else:
-                            prev_elem_iden == row[0]
-                            columna = self._elementos[2][row[0]].columna
-                            prev_elem_colum = columna
-                        self._valoraciones[fila, columna] = float(row[1])
+                        prev_usuari_nom = row[2]
+                        fila = self._usuarios[1][row[2]].fila
+                        prev_usuari_fila = fila
+                    if prev_elem_iden == row[0]:
+                        columna = prev_elem_colum
+                    else:
+                        prev_elem_iden == row[0]
+                        columna = self._elementos[2][row[0]].columna
+                        prev_elem_colum = columna
+                    self._valoraciones[fila, columna] = float(row[1])
             logging.debug("S'ha finalitzat la lectura de la base de dades.")
         except:
             exc_tuple = sys.exc_info()

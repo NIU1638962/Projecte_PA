@@ -168,3 +168,59 @@ task: <Task pending name='Task-1' coro=<Kernel.poll_control_queue() running at C
 		9468
 2022-05-02 23:49:43,304 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
 2022-05-02 23:49:51,611 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-03 18:46:29,829 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-03 18:46:29,850 | root | WARNING | Element repetit:
+	Dades execució:
+		['26958', 'Emma (1996)', 'Romance'] 
+		0 
+		5601
+2022-05-03 18:46:29,854 | root | WARNING | Element repetit:
+	Dades execució:
+		['64997', 'War of the Worlds (2005)', 'Action|Sci-Fi'] 
+		0 
+		6932
+2022-05-03 18:46:29,860 | root | WARNING | Element repetit:
+	Dades execució:
+		['144606', 'Confessions of a Dangerous Mind (2002)', 'Comedy|Crime|Drama|Romance|Thriller'] 
+		0 
+		9106
+2022-05-03 18:46:29,861 | root | WARNING | Element repetit:
+	Dades execució:
+		['147002', 'Eros (2004)', 'Drama|Romance'] 
+		0 
+		9135
+2022-05-03 18:46:29,862 | root | WARNING | Element repetit:
+	Dades execució:
+		['168358', 'Saturn 3 (1980)', 'Sci-Fi|Thriller'] 
+		0 
+		9468
+2022-05-03 18:46:29,863 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-03 18:46:33,931 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-03 18:51:51,545 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-03 18:51:51,561 | root | WARNING | Element repetit:
+	Dades execució:
+		['26958', 'Emma (1996)', 'Romance'] 
+		0 
+		5601
+2022-05-03 18:51:51,565 | root | WARNING | Element repetit:
+	Dades execució:
+		['64997', 'War of the Worlds (2005)', 'Action|Sci-Fi'] 
+		0 
+		6932
+2022-05-03 18:51:51,573 | root | WARNING | Element repetit:
+	Dades execució:
+		['144606', 'Confessions of a Dangerous Mind (2002)', 'Comedy|Crime|Drama|Romance|Thriller'] 
+		0 
+		9106
+2022-05-03 18:51:51,573 | root | WARNING | Element repetit:
+	Dades execució:
+		['147002', 'Eros (2004)', 'Drama|Romance'] 
+		0 
+		9135
+2022-05-03 18:51:51,573 | root | WARNING | Element repetit:
+	Dades execució:
+		['168358', 'Saturn 3 (1980)', 'Sci-Fi|Thriller'] 
+		0 
+		9468
+2022-05-03 18:51:51,574 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-03 18:51:55,425 | root | DEBUG | S'ha finalitzat la lectura de la database.
