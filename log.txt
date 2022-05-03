@@ -1,0 +1,170 @@
+2022-05-02 07:27:44,473 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 07:27:44,888 | root | DEBUG | S'ha finalitzat la lectura basica de 'Game's.
+2022-05-02 07:27:46,618 | root | DEBUG | S'ha finalitzat la lectura de 'Game's.
+2022-05-02 07:28:26,062 | root | ERROR | S'ha parat l'excució, linia actual: 
+	 ['1402', '4.0', 'robbirob']
+2022-05-02 07:33:37,572 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 07:33:37,603 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 07:33:44,971 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 07:41:46,527 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 07:41:46,920 | root | DEBUG | S'ha finalitzat la lectura basica de 'Game's.
+2022-05-02 07:41:48,582 | root | DEBUG | S'ha finalitzat la lectura de 'Game's.
+2022-05-02 07:42:00,103 | root | ERROR | S'ha parat l'excució, linia actual: 
+	['193584', '4.0', 'theorycraftist'] 
+	656 
+	21925
+2022-05-02 10:30:21,217 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 10:30:21,261 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 10:30:29,032 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 10:30:56,889 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 10:30:57,386 | root | DEBUG | S'ha finalitzat la lectura basica de 'Game's.
+2022-05-02 10:30:59,135 | root | DEBUG | S'ha finalitzat la lectura de 'Game's.
+2022-05-02 10:31:23,038 | root | ERROR | S'ha parat l'excució, linia actual, error: 'KeyboardInterrupt':  
+	['126426', '6.0', 'lionrampant'] 
+	1028 
+	21925
+2022-05-02 11:35:50,596 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 11:35:50,630 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 11:36:00,263 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 12:01:29,164 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 12:01:29,189 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 12:01:36,238 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 12:02:31,848 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 12:02:31,888 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 12:02:39,287 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 12:04:57,409 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 12:04:57,435 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 12:05:04,601 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 18:16:11,480 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:16:11,514 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 18:16:18,748 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 18:19:33,258 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:19:33,286 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 18:19:41,050 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 18:31:54,730 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:31:54,732 | root | ERROR | S'ha parat l'excució, error:
+	'FileNotFoundError': [Errno 2] No such file or directory: 'ml-latest-small/movies.csv'
+ Dades execució:
+	None 
+	0 
+	0
+2022-05-02 18:32:01,940 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:32:01,940 | root | ERROR | S'ha parat l'excució, error:
+	'FileNotFoundError': [Errno 2] No such file or directory: 'ml-latest-small/movies.csv'
+ Dades execució:
+	None 
+	0 
+	0
+2022-05-02 18:33:02,115 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:33:02,115 | root | ERROR | S'ha parat l'excució, error:
+	'FileNotFoundError': [Errno 2] No such file or directory: 'ml-latest-small/movies.csv'
+ Dades execució:
+	None 
+	0 
+	0
+2022-05-02 18:33:38,293 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:33:38,294 | root | ERROR | S'ha parat l'excució, error:
+	'FileNotFoundError': [Errno 2] No such file or directory: 'ml-latest-small/movies.csv'
+ Dades execució:
+	None 
+	0 
+	0
+2022-05-02 18:34:10,362 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:34:10,390 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 18:34:18,208 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 18:35:31,506 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:35:31,535 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 18:35:39,469 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 18:36:52,746 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:36:52,773 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 18:37:00,639 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 18:37:43,579 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:37:43,609 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 18:37:51,566 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 18:39:12,301 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:39:12,332 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 18:39:20,458 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 18:42:15,172 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:42:15,202 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 18:42:23,018 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 18:47:26,849 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 18:47:26,878 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 18:47:34,699 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 20:50:45,539 | asyncio | ERROR | Task was destroyed but it is pending!
+task: <Task pending name='Task-1' coro=<Kernel.poll_control_queue() running at C:\Users\JoelT\Anaconda3\lib\site-packages\ipykernel\kernelbase.py:241> wait_for=<Future finished result=<Future at 0x...state=pending>> cb=[_chain_future.<locals>._call_set_state() at C:\Users\JoelT\Anaconda3\lib\asyncio\futures.py:367]>
+2022-05-02 23:06:44,374 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 23:06:44,403 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 23:06:52,265 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 23:15:16,567 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 23:15:16,592 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 23:15:24,118 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 23:38:56,185 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 23:38:56,215 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 23:39:02,413 | root | ERROR | S'ha parat l'excució, error:
+	'KeyboardInterrupt': 
+ Dades execució:
+	['570', '3044', '2.5', '1181478965'] 
+	570 
+	9742
+2022-05-02 23:40:09,226 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 23:40:09,251 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 23:40:16,500 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 23:44:18,766 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 23:44:18,791 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 23:44:26,760 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 23:45:31,376 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 23:45:31,393 | root | WARNING | Element repetit:
+	Dades execució:
+		['26958', 'Emma (1996)', 'Romance'] 
+		0 
+		5601
+2022-05-02 23:45:31,397 | root | WARNING | Element repetit:
+	Dades execució:
+		['64997', 'War of the Worlds (2005)', 'Action|Sci-Fi'] 
+		0 
+		6932
+2022-05-02 23:45:31,404 | root | WARNING | Element repetit:
+	Dades execució:
+		['144606', 'Confessions of a Dangerous Mind (2002)', 'Comedy|Crime|Drama|Romance|Thriller'] 
+		0 
+		9106
+2022-05-02 23:45:31,405 | root | WARNING | Element repetit:
+	Dades execució:
+		['147002', 'Eros (2004)', 'Drama|Romance'] 
+		0 
+		9135
+2022-05-02 23:45:31,406 | root | WARNING | Element repetit:
+	Dades execució:
+		['168358', 'Saturn 3 (1980)', 'Sci-Fi|Thriller'] 
+		0 
+		9468
+2022-05-02 23:45:31,407 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 23:45:39,302 | root | DEBUG | S'ha finalitzat la lectura de la database.
+2022-05-02 23:49:43,272 | root | DEBUG | S'ha iniciant l'execució.
+2022-05-02 23:49:43,289 | root | WARNING | Element repetit:
+	Dades execució:
+		['26958', 'Emma (1996)', 'Romance'] 
+		0 
+		5601
+2022-05-02 23:49:43,295 | root | WARNING | Element repetit:
+	Dades execució:
+		['64997', 'War of the Worlds (2005)', 'Action|Sci-Fi'] 
+		0 
+		6932
+2022-05-02 23:49:43,302 | root | WARNING | Element repetit:
+	Dades execució:
+		['144606', 'Confessions of a Dangerous Mind (2002)', 'Comedy|Crime|Drama|Romance|Thriller'] 
+		0 
+		9106
+2022-05-02 23:49:43,302 | root | WARNING | Element repetit:
+	Dades execució:
+		['147002', 'Eros (2004)', 'Drama|Romance'] 
+		0 
+		9135
+2022-05-02 23:49:43,303 | root | WARNING | Element repetit:
+	Dades execució:
+		['168358', 'Saturn 3 (1980)', 'Sci-Fi|Thriller'] 
+		0 
+		9468
+2022-05-02 23:49:43,304 | root | DEBUG | S'ha finalitzat la lectura de 'Movies's.
+2022-05-02 23:49:51,611 | root | DEBUG | S'ha finalitzat la lectura de la database.
