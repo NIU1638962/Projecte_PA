@@ -41,13 +41,63 @@ class Dataset(metaclass=ABCMeta):
     @property
     def elementos(self):
         return self._elementos
+        def score_others_users_also(self, k, usuario):
+        valoraciones_usuario=self._valoraciones[usuario,:]
+        dict_similitudes={}
+        for fila in range(self._filas-1):
+            if fila!=usuario:
+                valoraciones_else=self._valoraciones[fila,:]
+                suma=0
+                den1=[]
+                den2=[]
+                for usu1, usu2 in (valoraciones_usuario, valoraciones_else):
+                    if usu1!=0 and usu2!=0:
+                        suma+=(usu1*usu2)
+                        den1.append(usu1)
+                        den2.append(usu2)
+                den1=[n**2 for n in den1]
+                den2=[n**2 for n in den2]
+                similitud=suma/(((sum(den1))**(1/2))*(sum(den2))**(1/2))
+                dict_similitudes[fila]=similitud
+        dict_similitudes = sorted(dict_similitudes.items(), key=lambda x: x[1], reverse=True)
+        lista_similitudes=dict_similitudes.items()
+        usuarios_mas_parecidos=lista_similitudes[:k]
+        return usuarios_mas_parecidos
+    
+    def other_users_also(self, k, usuario):
+       score_dict={}
+       usuarios_parecidos=self.score_other_users_also(k, usuario)
+       medias=[]
+       for columna in range(self._columnas):
+           recuento=0
+           suma=0
+           for fila in usuarios_parecidos:
+               if self._valoraciones[usuario[0],columna]!=0:
+                   recuento+=1
+                   suma+=self._valoraciones[usuario[0], columna]
+           if recuento==0:
+               media=0
+           else:               
+               media=suma/recuento
+               medias.append(medias)
+       for media, index in zip(medias, range(self._columnas[1]-1)):       
+          titulo=(self._elementos[0][index]._titol)
+          score_dict[titulo]=media
+       indice=[]
+       indices=[]
+       for valoraciones in (self._valoraciones[usuario]):
+          if valoraciones==0:
+              indice.append(indice)
+       recomendadas=list(score_dict.items())
+       peliculas_recomendadas=[]
+       for indice in indices:
+           peliculas_recomendadas.append(recomendadas[indice])
+       peliculas_recomendadas.sort(key = lambda x: x[1], reverse=True)
+       return peliculas_recomendadas
 
-        def top_popular_items (self, min_votos, usuario):
+            
+    def top_popular_items (self, min_votos, usuario):
         score_dict={}
-        # print("Elija una opción")
-        # print("Opción 1: listado de recomendaciones.")
-        # print("Opción 2: añadir valoraciones.")        
-        # opcion=input()
         medias=[]
         votos=[]
         valoraciones=[]
@@ -81,22 +131,20 @@ class Dataset(metaclass=ABCMeta):
             titulo=(self._elementos[0][index]._titol)
             score_dict[titulo]=score
         # score_dict = sorted(score_dict.items(), key=lambda x: x[1])
-        valoraciones_usuario=self._valoraciones[usuario,:]
+        valoraciones_usuario=self._valoraciones.getrow(usuario)
         indices=[]
         rec_usuario={}
-        for nota, columna in zip(valoraciones_usuario, range(valoraciones_usuario.size - 1)):
-            if nota==0:
-                indices.append(columna)
-        print(len(list(score_dict.keys())))
-        # for index in indices:
-        #     titol=list(score_dict.keys())
-        #     titol=titol[index]
-        #     rec_usuario[titol]=score_dict[titol]
-        # rec_usuario = sorted(rec_usuario.items(), key=lambda x: x[1], reverse=True)
-                
+        indices=valoraciones_usuario.nonzero()
+        print(len(indices[1]))
+        for index in indices[1]:
+            titol=list(score_dict.keys())
+            titol=titol[index]
+            rec_usuario[titol]=score_dict[titol]
+        rec_usuario = sorted(rec_usuario.items(), key=lambda x: x[1], reverse=True)
+        print(len(rec_usuario))
+        return rec_usuario
                 
             
-        return score_dict
         
         # elif opcion==2:
         #     dict_valoracion={}
@@ -116,7 +164,6 @@ class Dataset(metaclass=ABCMeta):
         #         score=self.score_top_popular_items(min_votos, columna)
         #         score_dict[pelicula]=score
         #     score_dict = sorted(score_dict.items(), key=lambda x: x[1])
-
     @abstractmethod
     def read_data(self, directory: str, names_files: List[str]):
         raise NotImplementedError()
