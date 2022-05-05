@@ -33,8 +33,8 @@ class Dataset(metaclass=ABCMeta):
     _valoraciones: lil_matrix = field(init=False, default=None)
     _columnas: int = field(init=False, default=0)
     _filas: int = field(init=False, default=0)
-    _scores_top_popular_items: lil_matrix[int] = field(init=False, default=None)
-    _min_vots: int = field(ini=False, default=None)
+    _scores_top_popular_items: lil_matrix = field(init=False, default=None)
+    _min_vots: int = field(init=False, default=None)
     _names_files_pickle: ClassVar[Tuple[str]] = (
         "valoraciones.dat",
         "elementos(0).dat",
@@ -63,44 +63,45 @@ class Dataset(metaclass=ABCMeta):
     def elementos(self):
         return self._elementos
 
-    def score_top_popular_items(self, min_votos, columna):
-        size = self._valoraciones.size()
-        recuento = 0
-        suma = 0
-        for i in range(size[1]):
-            if self._valoraciones[columna, i] != 0:
-                recuento += 1
-                suma += self._valoraciones[columna, i]
-        media_global = suma / size[1]
-        media = suma / recuento
-        score = (recuento / (recuento + min_votos) * media) + (
-            min_votos / (recuento + min_votos) * media_global
-        )
-        return score
+    def _score_top_popular_items(self):
+        avg_item = lil_matrix((1, self._columnas))
+        num_vots = lil_matrix((1, self._columnas), dtype=int)
+        score = lil_matrix((1, self._columnas))
+        for columna in range(self._columnas):
+            num_vots[0, columna] = self._valoraciones[:, columna].count_nonzero()
+            if num_vots[0, columna] >= self._min_vots:
+                avg_item[0, columna] = (self._valoraciones[:, columna].sum()) / (
+                    num_vots[0, columna]
+                )
+            avg_global = avg_item.mean()
+        for columna in range(self._columnas):
+            if num_vots[0, columna] >= self._min_vots:
+                score[0, columna] = (
+                    ((num_vots[0, columna]) / (num_vots[0, columna] + self._min_vots))
+                    * avg_item[0, columna]
+                ) + (
+                    ((self._min_vots) / (num_vots[0, columna] + self._min_vots))
+                    * avg_global
+                )
+            else:
+                score[0, columna] = 0
+        self._scores_top_popular_items = score
 
-    def top_popular_items(self, min_vots, usuario):
+    def top_popular_items(self, min_vots, usuario: int):
+        assert 0 <= usuario < self._filas, "Usuari fora de rang."
         # score_dict = {}
-        if self._scores_top_popular_items is None or self._min_vots == min_vots:
+        if self._scores_top_popular_items is None or self._min_vots != min_vots:
             self._min_vots = min_vots
-            avg_item = lil_matrix((1, self._columnas))
-            num_vots = lil_matrix((1, self._columnas), dtype=int)
-            score = lil_matrix((1, self._columnas))
-            for columna in range(self._columnas):
-                num_vots[0, columna] = self._valoraciones[:, columna].count_nonzero()
-                if num_vots[0, columna] >= min_vots:
-                    avg_item[0, columna] = (self._valoraciones[:, columna].sum()) / (
-                        num_vots[0, columna]
-                    )
-                avg_global = avg_item.mean()
-            for columna in range(self._columnas):
-                if num_vots[0, columna] >= min_vots:
-                    score[0, columna] = (
-                        ((num_vots[0, columna]) / (num_vots[0, columna] + min_vots))
-                        * avg_item[0, columna]
-                    ) + (((min_vots) / (num_vots[0, columna] + min_vots)) * avg_global)
-                else:
-                    score[0, columna] = 0
-            self._scores_top_popular_items = score
+            self._score_top_popular_items()
+        return sorted(
+            [
+                (self._elementos[0][i], self._scores_top_popular_items[0, i])
+                for i in self._scores_top_popular_items.nonzero()[1]
+                if i not in list(self._valoraciones.getrow(usuario).nonzero()[1])
+            ],
+            key=lambda x: x[1],
+            reverse=True,
+        )
         # for score, index in zip(valoraciones, range(self._columnas - 1)):
         #     titulo = self._elementos[0][index]._titol
         #     score_dict[titulo] = score
@@ -116,7 +117,7 @@ class Dataset(metaclass=ABCMeta):
         #     rec_usuario[titol] = score_dict[titol]
         # rec_usuario = sorted(rec_usuario.items(), key=lambda x: x[1], reverse=True)
         # print(len(rec_usuario))
-        return rec_usuario
+        # return rec_usuario
 
     @abstractmethod
     def read_data(self):

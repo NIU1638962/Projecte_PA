@@ -1,2 +1,22 @@
-2022-05-05 13:09:21,670 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
-2022-05-05 13:09:21,826 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 21:47:22,507 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 21:47:22,684 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 21:47:37,311 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 21:47:37,467 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 21:48:42,532 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 21:48:42,681 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 21:51:16,019 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 21:51:16,182 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 21:52:02,627 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 21:52:02,818 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 21:55:45,073 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 21:55:45,280 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 21:56:29,235 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 21:56:29,439 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 21:59:03,569 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 21:59:03,803 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 21:59:30,178 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 21:59:30,386 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 22:01:13,522 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 22:01:13,734 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.
+2022-05-05 22:03:11,891 | root | DEBUG | S'ha iniciat la lectura de la base de dades de películes a través de guardat binari.
+2022-05-05 22:03:12,102 | root | DEBUG | S'ha finalitzat la lectura de la base de dades a través de guardat binari.

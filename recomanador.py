@@ -6,6 +6,8 @@ Created on Sat Apr 30 15:23:23 2022
 """
 from dataset import Pelicules, Board_Games
 import console_messages as co
+from typing import List, Tuple
+from data import Data
 
 DIRECTORY_PEL = "ml-latest-small"
 NAMES_FILES_PEL = ("movies.csv", "ratings.csv")
@@ -45,9 +47,10 @@ def recomanador():
                 menu_select_recomanacio()
                 opcio_recomanacio = int(input(co.cgray("Selecciona una opció: ")))
                 if opcio_recomanacio == 1:
-                    while usuari() != "":
-                        int(input(co.cgray("Selecciona un usuari: ")))
-                        dataset.top_popular_items(10, usuari)
+                    usuari = input(co.cgray("Selecciona un usuari: "))
+                    while usuari != "":
+                        visualitza_rec(dataset.top_popular_items(10, int(usuari))[:5])
+                        usuari = input(co.cgray("Selecciona un usuari: "))
                 elif opcio_recomanacio == 2:
                     print(co.cdred("Opció no implementada."))
                 elif opcio_recomanacio == 3:
@@ -58,6 +61,14 @@ def recomanador():
                 else:
                     print(co.cdred("Error: Seleccioni opció vàlida."))
                     opcio_recomanacio = None
+
+
+def visualitza_rec(recomanacio: List[Tuple[Data, int]]):
+    for i, elem in enumerate(recomanacio):
+        print(co.cpurple("Recomendació " + str(i + 1)))
+        print("\t" + co.cgreen("Títol") + ": " + elem[0].titol)
+        for cat in elem[0].caracteristicas.keys():
+            print("\t" + co.cgreen(cat) + ": " + str(elem[0].caracteristicas[cat]))
 
 
 def menu_select_dataset():
