@@ -68,7 +68,13 @@ def visualitza_rec(recomanacio: List[Tuple[Data, int]]):
         print(co.cpurple("Recomendació " + str(i + 1)))
         print("\t" + co.cgreen("Títol") + ": " + elem[0].titol)
         for cat in elem[0].caracteristicas.keys():
-            print("\t" + co.cgreen(cat) + ": " + str(elem[0].caracteristicas[cat]))
+            if elem[0].caracteristicas[cat]:
+                print(
+                    "\t"
+                    + co.cgreen(cat)
+                    + ": "
+                    + ", ".join(elem[0].caracteristicas[cat])
+                )
 
 
 def menu_select_dataset():

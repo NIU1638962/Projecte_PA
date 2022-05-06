@@ -15,6 +15,8 @@ import logging
 import sys
 import pickle
 import os
+import numpy as np
+from operacions import similitud
 
 logging.basicConfig(
     filename="log.txt",
@@ -89,7 +91,7 @@ class Dataset(metaclass=ABCMeta):
 
     def top_popular_items(self, min_vots, usuario: int):
         assert 0 <= usuario < self._filas, "Usuari fora de rang."
-        # score_dict = {}
+        assert min_vots < self._filas, "Demanat més objectes comparat que disponibles."
         if self._scores_top_popular_items is None or self._min_vots != min_vots:
             self._min_vots = min_vots
             self._score_top_popular_items()
@@ -102,22 +104,73 @@ class Dataset(metaclass=ABCMeta):
             key=lambda x: x[1],
             reverse=True,
         )
-        # for score, index in zip(valoraciones, range(self._columnas - 1)):
-        #     titulo = self._elementos[0][index]._titol
-        #     score_dict[titulo] = score
-        # # score_dict = sorted(score_dict.items(), key=lambda x: x[1])
-        # valoraciones_usuario = self._valoraciones.getrow(usuario)
-        # indices = []
-        # rec_usuario = {}
-        # indices = valoraciones_usuario.nonzero()
-        # print(len(indices[1]))
-        # for index in indices[1]:
-        #     titol = list(score_dict.keys())
-        #     titol = titol[index]
-        #     rec_usuario[titol] = score_dict[titol]
-        # rec_usuario = sorted(rec_usuario.items(), key=lambda x: x[1], reverse=True)
-        # print(len(rec_usuario))
-        # return rec_usuario
+
+    def _score_other_users_also(self, usuario):
+        u = self._valoraciones.getrow(usuario).toarray()
+        similitudes = []
+        for fila in range(self._filas):
+            if fila != usuario:
+                v = self._valoraciones.getrow(fila).toarray()
+                similitudes.append((fila, similitud(u, v)))
+            else:
+                similitudes.append(fila, 0)
+                # OPTIMIZE
+                # valoraciones_else = self._valoraciones[fila, :]
+                # suma = 0
+                # den1 = []
+                # den2 = []
+                # for i in range(self._columnas):
+                #     usu1 = valoraciones_usuario[0, i]
+                #     usu2 = valoraciones_else[0, i]
+                #     if not np.array_equal(usu1, 0) and not np.array_equal(usu2, 0):
+                #         suma += (valoraciones_usuario[0, i]) * valoraciones_else[0, i]
+                #         den1.append(valoraciones_usuario[0, i])
+                #         den2.append(valoraciones_else[0, i])
+                # den1 = [n ** 2 for n in den1]
+                # den2 = [n ** 2 for n in den2]
+                # den1 = sum(den1)
+                # den2 = sum(den2)
+                # if den1 != 0 or den2 != 0:
+                #     similitud = suma / ((((den1)) ** (1 / 2)) * ((den2)) ** (1 / 2))
+                #     dict_similitudes[fila] = similitud
+        return sorted(similitudes, key=lambda x: x[1], reverse=True)
+
+    def other_users_also(self, k, usuario):
+        assert 0 <= usuario < self._filas, "Usuari fora de rang."
+        assert k < self._filas, "Demanat més objectes comparat que disponibles."
+        score_dict = {}
+        usuarios_parecidos = self._score_other_users_also(usuario)[:k]
+
+        # OPTIMIZE
+        medias = []
+        for columna in range(self._columnas):
+            recuento = 0
+            suma = 0
+            for fila in usuarios_parecidos:
+                if self._valoraciones[fila[0], columna] != 0:
+                    recuento += 1
+                    suma += self._valoraciones[fila[0], columna]
+            if recuento == 0:
+                media = 0
+            else:
+                media = suma / recuento
+                medias.append(medias)
+        for media, index in zip(medias, range(self._columnas)):
+            titulo = self._elementos[0][index]._titol
+            score_dict[titulo] = media
+        indices = []
+        for i in range(self._columnas):
+            print(self._valoraciones[usuario, i])
+            if self._valoraciones[usuario, i] == 0:
+
+                indices.append(i)
+        print(indices)
+        recomendadas = list(score_dict.items())
+        peliculas_recomendadas = []
+        for indice in indices:
+            peliculas_recomendadas.append(recomendadas[indice])
+        peliculas_recomendadas.sort(key=lambda x: x[1], reverse=True)
+        return peliculas_recomendadas
 
     @abstractmethod
     def read_data(self):
@@ -388,7 +441,7 @@ class Board_Games(Dataset):
                             for i in range(1, len(row), 1):
                                 self._elementos[2][row[0]].caracteristicas[
                                     fields[i]
-                                ] = bool(int(row[i]))
+                                ] = list(bool(int(row[i])))
                 logging.debug("S'ha finalitzat la lectura de 'Game's.")
                 with open(
                     self._directory + "/" + self._names_files[3], "r", encoding="utf8"
