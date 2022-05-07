@@ -18,13 +18,6 @@ import os
 import numpy as np
 from operacions import similitud
 
-logging.basicConfig(
-    filename="log.txt",
-    filemode="w",
-    level=logging.DEBUG,
-    format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
-)
-
 
 @dataclass
 class Dataset(metaclass=ABCMeta):
@@ -65,7 +58,12 @@ class Dataset(metaclass=ABCMeta):
     def elementos(self):
         return self._elementos
 
+    @property
+    def filas(self):
+        return self._filas
+
     def _score_top_popular_items(self):
+        logging.debug("Càlculant scores.")
         avg_item = lil_matrix((1, self._columnas))
         num_vots = lil_matrix((1, self._columnas), dtype=int)
         score = lil_matrix((1, self._columnas))
@@ -75,7 +73,10 @@ class Dataset(metaclass=ABCMeta):
                 avg_item[0, columna] = (self._valoraciones[:, columna].sum()) / (
                     num_vots[0, columna]
                 )
-            avg_global = avg_item.mean()
+        logging.debug("Nombre de vots:\n\t%s", num_vots)
+        logging.debug("Mitjanes:\n\t%s", avg_item)
+        avg_global = (avg_item.sum()) / avg_item.count_nonzero()
+        logging.debug("Mitjana global:\n\t%s", avg_global)
         for columna in range(self._columnas):
             if num_vots[0, columna] >= self._min_vots:
                 score[0, columna] = (
@@ -87,14 +88,21 @@ class Dataset(metaclass=ABCMeta):
                 )
             else:
                 score[0, columna] = 0
+        logging.debug("Scores:\n\t%s", score)
         self._scores_top_popular_items = score
 
     def top_popular_items(self, min_vots, usuario: int):
+        logging.debug(
+            "Càlcul 'top_popular_items' amb min_vots: %s i usuari: %s.",
+            min_vots,
+            usuario,
+        )
         assert 0 <= usuario < self._filas, "Usuari fora de rang."
         assert min_vots < self._filas, "Demanat més objectes comparat que disponibles."
         if self._scores_top_popular_items is None or self._min_vots != min_vots:
             self._min_vots = min_vots
             self._score_top_popular_items()
+        logging.debug("Retornant resultat.")
         return sorted(
             [
                 (self._elementos[0][i], self._scores_top_popular_items[0, i])
@@ -105,16 +113,16 @@ class Dataset(metaclass=ABCMeta):
             reverse=True,
         )
 
-    def _score_other_users_also(self, usuario):
-        u = self._valoraciones.getrow(usuario).toarray()
+    def _similitud_other_users_also(self, usuario, posicio):
+        logging.debug("Càlculant similituds amb usuari:\n\t%s: %s.", posicio, usuario)
+        u = usuario.toarray()
         similitudes = []
         for fila in range(self._filas):
-            if fila != usuario:
+            if fila != posicio:  # !!!
                 v = self._valoraciones.getrow(fila).toarray()
-                similitudes.append((fila, similitud(u, v)))
+                similitudes.append([fila, similitud(u, v)])
             else:
-                similitudes.append(fila, 0)
-                # OPTIMIZE
+                similitudes.append([fila, 0])
                 # valoraciones_else = self._valoraciones[fila, :]
                 # suma = 0
                 # den1 = []
@@ -133,44 +141,75 @@ class Dataset(metaclass=ABCMeta):
                 # if den1 != 0 or den2 != 0:
                 #     similitud = suma / ((((den1)) ** (1 / 2)) * ((den2)) ** (1 / 2))
                 #     dict_similitudes[fila] = similitud
+        logging.debug("Retornant similituds.\n\t%s", similitudes)
         return sorted(similitudes, key=lambda x: x[1], reverse=True)
 
     def other_users_also(self, k, usuario):
+        logging.debug(
+            "Càlcul 'other_users_also' amb k: %s i usuari: %s.", k, usuario,
+        )
         assert 0 <= usuario < self._filas, "Usuari fora de rang."
-        assert k < self._filas, "Demanat més objectes comparat que disponibles."
-        score_dict = {}
-        usuarios_parecidos = self._score_other_users_also(usuario)[:k]
-
-        # OPTIMIZE
-        medias = []
+        assert 0 < k < self._filas, "Demanat més objectes comparats que disponibles."
+        # score_dict = {}
+        u = self._valoraciones.getrow(usuario)
+        k_similars = self._similitud_other_users_also(u, usuario)[:k]
+        scores = lil_matrix((1, self._columnas))
+        # avg_user = np.array([for user in k_similars ])
+        for i, user in enumerate(k_similars):
+            k_similars[i].append(
+                (self._valoraciones[user[0], :].sum())
+                / (self._valoraciones[user[0], :].count_nonzero())
+            )
+        logging.debug("Similituds i mitjanes:\n\t%s", k_similars)
+        avg_u = (u.sum()) / (u.count_nonzero())
+        logging.debug("Mitjana usuari: %s", avg_u)
         for columna in range(self._columnas):
-            recuento = 0
-            suma = 0
-            for fila in usuarios_parecidos:
-                if self._valoraciones[fila[0], columna] != 0:
-                    recuento += 1
-                    suma += self._valoraciones[fila[0], columna]
-            if recuento == 0:
-                media = 0
-            else:
-                media = suma / recuento
-                medias.append(medias)
-        for media, index in zip(medias, range(self._columnas)):
-            titulo = self._elementos[0][index]._titol
-            score_dict[titulo] = media
-        indices = []
-        for i in range(self._columnas):
-            print(self._valoraciones[usuario, i])
-            if self._valoraciones[usuario, i] == 0:
+            denominador = 0
+            numerador = 0
+            for user in k_similars:
+                numerador += user[1] * (self._valoraciones[user[0], columna] - user[2])
+                denominador += user[1]
+            scores[0, columna] = avg_u * ((numerador) / (denominador))
+        logging.debug("Scores:\n\t%s", scores)
+        logging.debug("Retornant resultat.")
+        return sorted(
+            [
+                (self._elementos[0][i], scores[0, i])
+                for i in scores.nonzero()[1]
+                if i not in list(u.nonzero()[1])
+            ],
+            key=lambda x: x[1],
+            reverse=True,
+        )
+        # medias = []
+        # for columna in range(self._columnas):
+        #     recuento = 0
+        #     suma = 0
+        #     for fila in usuarios_parecidos:
+        #         if self._valoraciones[fila[0], columna] != 0:
+        #             recuento += 1
+        #             suma += self._valoraciones[fila[0], columna]
+        #     if recuento == 0:
+        #         media = 0
+        #     else:
+        #         media = suma / recuento
+        #         medias.append(medias)
+        # for media, index in zip(medias, range(self._columnas)):
+        #     titulo = self._elementos[0][index]._titol
+        #     score_dict[titulo] = media
+        # indices = []
+        # for i in range(self._columnas):
+        #     print(self._valoraciones[usuario, i])
+        #     if self._valoraciones[usuario, i] == 0:
 
-                indices.append(i)
-        print(indices)
-        recomendadas = list(score_dict.items())
-        peliculas_recomendadas = []
-        for indice in indices:
-            peliculas_recomendadas.append(recomendadas[indice])
-        peliculas_recomendadas.sort(key=lambda x: x[1], reverse=True)
-        return peliculas_recomendadas
+        #         indices.append(i)
+        # print(indices)
+        # recomendadas = list(score_dict.items())
+        # peliculas_recomendadas = []
+        # for indice in indices:
+        #     peliculas_recomendadas.append(recomendadas[indice])
+        # peliculas_recomendadas.sort(key=lambda x: x[1], reverse=True)
+        # return peliculas_recomendadas
 
     @abstractmethod
     def read_data(self):
