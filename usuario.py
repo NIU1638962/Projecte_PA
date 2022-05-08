@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Apr 20 13:01:16 2022
-@author: Joel Tapia Salvador
-Created on Wed Apr 27 17:08:55 2022
-@author: marcs
+@author: Joel Tapia Salvador (1638962) i Aksel Serret Llopis ()
 """
 from dataclasses import dataclass, field
 from typing import List, Dict
@@ -16,28 +14,41 @@ class Usuari:
     _gustos: Dict[str, List[str]] = field(init=False, default_factory=dict)
 
     @property
-    def nom(self):
+    def nom(self) -> str:
+        """
+        Getter del atribut _nom.
+
+        Returns
+        -------
+        str
+            Nom del usuari.
+
+        """
         return self._nom
 
-    @nom.setter
-    def nom(self, nom):
-        self._nom = nom
-
     @property
-    def fila(self):
+    def fila(self) -> int:
+        """
+        Getter del atribut _fila.
+
+        Returns
+        -------
+        int
+            Fila en la qual es troben les valoracions del usuari dins de la mtriu
+            de valoracions..
+
+        """
         return self._fila
 
-    @fila.setter
-    def fila(self, fila):
-        self._fila = fila
-
     @property
-    def gustos(self):
-        return self._gustos
+    def gustos(self) -> Dict[str, List[str]]:
+        """
+        Getter del atribut _gustos.
 
-    @gustos.setter
-    def gustos(self, valor):
-        if isinstance(valor, dict):
-            self._gustos = valor
-        else:
-            raise TypeError
+        Returns
+        -------
+        Dict[str, List[str]]
+            Gustos identificatoris del usuari.
+
+        """
+        return self._gustos

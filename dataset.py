@@ -2,7 +2,7 @@
 """
 Created on Wed Apr 20 13:00:34 2022
 
-@author: Joel Tapia Salvador
+@author: Joel Tapia Salvador (1638962) i Aksel Serret Llopis ()
 """
 from dataclasses import dataclass, field
 from typing import Dict, Tuple, ClassVar, List
@@ -18,10 +18,11 @@ from operacions import similitud
 
 @dataclass
 class Dataset(metaclass=ABCMeta):
+
     _directory: str
     _names_files: Tuple[str]
-    _elementos: Tuple[Dict[int, Data]] = field(init=False, default=({}, {}, {}))
-    _usuarios: Tuple[Dict[int, Usuari]] = field(init=False, default=({}, {}))
+    _elementos: Tuple[Dict[str, Data]] = field(init=False, default=({}, {}, {}))
+    _usuarios: Tuple[Dict[str, Usuari]] = field(init=False, default=({}, {}))
     _valoraciones: lil_matrix = field(init=False, default=None)
     _columnas: int = field(init=False, default=0)
     _filas: int = field(init=False, default=0)
@@ -44,22 +45,54 @@ class Dataset(metaclass=ABCMeta):
         )
 
     @property
-    def usuarios(self):
+    def usuarios(self) -> Tuple[Dict[int, Usuari]]:
+        """
+        Getter del atribut _usuarios.
+        Returns
+        -------
+        Tuple[Dict[int, Usuari]]
+            Indexació del objectes usuaris per facilitar accés.
+
+        """
         return self._usuarios
 
     @property
-    def valoraciones(self):
-        return self._valoraciones
+    def elementos(self) -> Tuple[Dict[int, Data]]:
+        """
+        Getter del atribut _elementos.
 
-    @property
-    def elementos(self):
+        Returns
+        -------
+        Tuple[Dict[int, Data]]
+            Indexació del objectes data per facilitar accés.
+
+        """
         return self._elementos
 
     @property
-    def filas(self):
+    def filas(self) -> int:
+        """
+        Getter del atribut _filas.
+
+        Returns
+        -------
+        int
+            Nombre de files o nombre d'usuaris guardats en l'objecte.
+
+        """
         return self._filas
 
     def _score_top_popular_items(self):
+        """
+        Funció que càlcula les scores de cada columna ignorant valors en 0 i
+        olumnes amb menys items nonzero que _min_vots i guarda el resultat en
+        l'atribut __scores_top_popular_items.
+
+        Returns
+        -------
+        None.
+
+        """
         logging.debug("Càlculant scores.")
         avg_item = lil_matrix((1, self._columnas))
         num_vots = lil_matrix((1, self._columnas), dtype=int)
@@ -98,19 +131,25 @@ class Dataset(metaclass=ABCMeta):
         self, min_vots: int, usuario: int
     ) -> List[Tuple[Data, float]]:
         """
-
+        Càlcula i genera una llista ordenada (de més a menys) dels elements
+        que més puntuació tenen, basat en les valoracions dels altres usuaris,
+        ignorat les ja valorades pel usuari donat i les que tenen menys
+        valoracions que min_vots.
 
         Parameters
         ----------
         min_vots : int
-            DESCRIPTION.
+            Quantitat mínima de vots que necessita un element per calcular la
+            seva score, en comptes de ser 0.
         usuario : int
-            DESCRIPTION.
+            Indicador de la fila del usuari a quí es recomanarà els elements,
+            no es recomanen els elelents ja valorats per aquest.
 
         Returns
         -------
         List[Tuple[Data, float]]
-            DESCRIPTION.
+            Llista ordenada dels elements per score, referencia al element i la
+            score en questió.
 
         """
         logging.debug(
@@ -146,19 +185,21 @@ class Dataset(metaclass=ABCMeta):
         self, usuario: lil_matrix, posicio: int
     ) -> List[List[float]]:
         """
-
+        Càlcula la similitud entre l'usuari donat i tota la resta.
 
         Parameters
         ----------
         usuario : lil_matrix
-            DESCRIPTION.
+            Valoracions del usuari amb qui calcular la posició.
         posicio : int
-            DESCRIPTION.
+            Posió a la matriu per ignorar el usuari en sí (ja que la similitud
+            serà la màxima).
 
         Returns
         -------
-        List[List[int, float]]
-            DESCRIPTION.
+        List[List[float]]
+            Llista de llistes amb l'usuari i la similitud que li correspon,
+            ordenada de mayor a menor similitud.
 
         """
         logging.debug("Càlculant similituds amb usuari:\n\t%s: %s.", posicio, usuario)
@@ -182,19 +223,24 @@ class Dataset(metaclass=ABCMeta):
 
     def other_users_also(self, k: int, usuario: int) -> List[Tuple[Data, float]]:
         """
-
+        Càlcula i genera una llista ordenada (de més a menys) dels elements
+        que més puntuació tenen, basat en les valoracions dels usuaris més
+        similars al usuari donat, ignorat les ja valorades pel usuari donat.
 
         Parameters
         ----------
         k : int
-            DESCRIPTION.
+            Nombre de usuaris més similars que s'hagafen per fer el càlcul dels
+            scores dels elements.
         usuario : int
-            DESCRIPTION.
+            Indicador de la fila del usuari a quí es recomanarà els elements,
+            no es recomanen els elelents ja valorats per aquest.
 
         Returns
         -------
         List[Tuple[Data, float]]
-            DESCRIPTION.
+           Llista ordenada dels elements per score, referencia al element i la
+           score en questió.
 
         """
         logging.debug(
@@ -255,7 +301,8 @@ class Dataset(metaclass=ABCMeta):
         Raises
         ------
         NotImplementedError
-            DESCRIPTION.
+            Aquest métode depen del format del conjunt de dades, per tant s'ha
+            de programar un lector inicial per a cada clase.
 
         Returns
         -------

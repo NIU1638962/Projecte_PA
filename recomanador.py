@@ -2,14 +2,14 @@
 """
 Created on Sat Apr 30 15:23:23 2022
 
-@author: JoelT
+@author: Joel Tapia Salvador (1638962)
 """
 import sys
 import traceback
 import logging
 from typing import List, Tuple
 from películes import Pelicules
-from board_games import Board_Games
+from board_games import BoardGames
 from data import Data
 import console_messages as co
 
@@ -50,7 +50,7 @@ def recomanador():
                     "Incialitzat 'dataset' a  objecte 'Películes'.\n\t%s", dataset
                 )
             elif opcio_dataset == 2:
-                dataset = Board_Games(DIRECTORY_GAM, NAMES_FILES_GAM)
+                dataset = BoardGames(DIRECTORY_GAM, NAMES_FILES_GAM)
                 logging.debug(
                     "Incialitzat 'dataset' a  objecte 'Board_Games'.\n\t%s", dataset
                 )
@@ -81,7 +81,7 @@ def recomanador():
                         usuari = input(
                             co.cgray(
                                 "Selecciona un usuari entre 0-"
-                                + str(dataset.filas)
+                                + str(dataset.filas - 1)
                                 + " : "
                             )
                         )
@@ -112,7 +112,13 @@ def recomanador():
                                     logging.debug("Recomanacions: %s", recomanacio)
                                     visualitza_rec(recomanacio[:N_RECOMANACIONS])
                                     recomanacio = None
-                            usuari = input(co.cgray("Selecciona un usuari: "))
+                            usuari = input(
+                                co.cgray(
+                                    "Selecciona un usuari entre 0-"
+                                    + str(dataset.filas - 1)
+                                    + " : "
+                                )
+                            )
                             logging.debug("Usuari escollid: %s", usuari)
                     elif opcio_recomanacio == 4:
                         print(co.clblue("Sortint del menú..."))
