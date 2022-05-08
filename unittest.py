@@ -207,12 +207,53 @@ class testPelicules(unittest.TestCase):
         )
 
     def test_other_users_also(self):
-        self.assertEqual(self.dataset.other_users_also(1, 0), [])
-        self.assertEqual(self.dataset.other_users_also(1, 1), [])
-        self.assertEqual(self.dataset.other_users_also(1, 2), [])
-        self.assertEqual(self.dataset.other_users_also(1, 3), [])
-        self.assertEqual(self.dataset.other_users_also(1, 4), [])
-        self.assertEqual(self.dataset.other_users_also(1, 5), [])
+        self.assertEqual(
+            self.dataset.other_users_also(1, 0),
+            [
+                (self.dataset.elementos[0][4], 4.633333333333334),
+                (self.dataset.elementos[0][3], 4.133333333333334),
+            ],
+        )
+        self.assertEqual(
+            self.dataset.other_users_also(1, 1),
+            [
+                (self.dataset.elementos[0][4], 5.633333333333334),
+                (self.dataset.elementos[0][3], 5.133333333333334),
+                (self.dataset.elementos[0][2], 0.6333333333333337),
+            ],
+        )
+        self.assertEqual(
+            self.dataset.other_users_also(1, 2),
+            [
+                (self.dataset.elementos[0][0], 5.366666666666666),
+                (self.dataset.elementos[0][5], 4.366666666666666),
+                (self.dataset.elementos[0][2], 3.3666666666666663),
+            ],
+        )
+        self.assertEqual(
+            self.dataset.other_users_also(1, 3),
+            [
+                (self.dataset.elementos[0][0], 5.266666666666667),
+                (self.dataset.elementos[0][1], 4.266666666666667),
+                (self.dataset.elementos[0][2], 3.2666666666666666),
+            ],
+        )
+        self.assertEqual(
+            self.dataset.other_users_also(1, 4),
+            [
+                (self.dataset.elementos[0][4], 4.0),
+                (self.dataset.elementos[0][3], 3.5000000000000004),
+                (self.dataset.elementos[0][5], -0.9999999999999996),
+            ],
+        )
+        self.assertEqual(
+            self.dataset.other_users_also(1, 5),
+            [
+                (self.dataset.elementos[0][4], 4.2666666666666675),
+                (self.dataset.elementos[0][3], 3.766666666666667),
+                (self.dataset.elementos[0][2], -0.733333333333333),
+            ],
+        )
 
 
 if __name__ == "__main__":
