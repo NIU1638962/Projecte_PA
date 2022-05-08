@@ -4,13 +4,14 @@ Created on Sat Apr 30 15:23:23 2022
 
 @author: JoelT
 """
-from dataset import Pelicules, Board_Games
-import console_messages as co
-from typing import List, Tuple
-from data import Data
-import logging
-import traceback
 import sys
+import traceback
+import logging
+from typing import List, Tuple
+from películes import Pelicules
+from board_games import Board_Games
+from data import Data
+import console_messages as co
 
 
 logging.basicConfig(
@@ -58,7 +59,7 @@ def recomanador():
                 dataset = None
                 logging.debug("Dataset cleared i sortint del programa.\n\t%s", dataset)
             else:
-                print(co.CDRED("Error: Seleccioni opció vàlida."))
+                print(co.cdred("Error: Seleccioni opció vàlida."))
                 opcio_dataset = None
                 dataset = None
                 logging.warning(
@@ -86,6 +87,7 @@ def recomanador():
                         )
                         logging.debug("Usuari escollid: %s", usuari)
                         while usuari != "":
+                            recomanacio = None
                             try:
                                 usuari = int(usuari)
                             except ValueError as message:
@@ -109,6 +111,7 @@ def recomanador():
                                 else:
                                     logging.debug("Recomanacions: %s", recomanacio)
                                     visualitza_rec(recomanacio[:N_RECOMANACIONS])
+                                    recomanacio = None
                             usuari = input(co.cgray("Selecciona un usuari: "))
                             logging.debug("Usuari escollid: %s", usuari)
                     elif opcio_recomanacio == 4:
@@ -147,21 +150,22 @@ def recomanador():
 
 
 def visualitza_rec(recomanacio: List[Tuple[Data, int]]):
-    logging.info("Inicant visualització de les recomanacions.")
-    logging.debug("\n\t%s", recomanacio)
-    for i, elem in enumerate(recomanacio):
-        print(co.cpurple("Recomendació " + str(i + 1)))
-        print("\t" + co.cgreen("Títol") + ": " + elem[0].titol)
-        for cat in elem[0].caracteristicas.keys():
-            if elem[0].caracteristicas[cat]:
-                print(
-                    "\t"
-                    + co.cgreen(cat)
-                    + ": "
-                    + ", ".join(elem[0].caracteristicas[cat])
-                )
-        print("\t" + co.cgreen("Score") + ": " + str(elem[1]))
-    logging.info("Visualització finalitzada.")
+    if recomanacio is not None:
+        logging.info("Iniciant visualització de les recomanacions.")
+        logging.debug("\n\t%s", recomanacio)
+        for i, elem in enumerate(recomanacio):
+            print(co.cpurple("Recomendació " + str(i + 1)))
+            print("\t" + co.cgreen("Títol") + ": " + elem[0].titol)
+            for cat in elem[0].caracteristicas.keys():
+                if elem[0].caracteristicas[cat]:
+                    print(
+                        "\t"
+                        + co.cgreen(cat)
+                        + ": "
+                        + ", ".join(elem[0].caracteristicas[cat])
+                    )
+            print("\t" + co.cgreen("Score") + ": " + str(elem[1]))
+        logging.info("Visualització finalitzada.")
 
 
 def menu_select_dataset():

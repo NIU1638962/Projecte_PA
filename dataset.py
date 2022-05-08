@@ -5,17 +5,14 @@ Created on Wed Apr 20 13:00:34 2022
 @author: Joel Tapia Salvador
 """
 from dataclasses import dataclass, field
-from typing import Dict, Tuple, ClassVar
+from typing import Dict, Tuple, ClassVar, List
 from abc import ABCMeta, abstractmethod
-import csv
-from scipy.sparse import lil_matrix
-from data import Data, Pelicula, Game
-from usuario import Usuari
 import logging
-import sys
 import pickle
 import os
-import numpy as np
+from scipy.sparse import lil_matrix
+from data import Data
+from usuario import Usuari
 from operacions import similitud
 
 
@@ -43,7 +40,7 @@ class Dataset(metaclass=ABCMeta):
 
     def __post_init__(self):
         self._names_files_pickle = tuple(
-            [self._directory + "_pickle" + "/" + i for i in self._names_files_pickle]
+            self._directory + "_pickle" + "/" + i for i in self._names_files_pickle
         )
 
     @property
@@ -67,6 +64,8 @@ class Dataset(metaclass=ABCMeta):
         avg_item = lil_matrix((1, self._columnas))
         num_vots = lil_matrix((1, self._columnas), dtype=int)
         score = lil_matrix((1, self._columnas))
+        # Càlcula els nombres de vots (elements no equivalents a 0) i la mija
+        # (si té el nombre mínim de vots) (no contant els 0) de cada columna.
         for columna in range(self._columnas):
             num_vots[0, columna] = self._valoraciones[:, columna].count_nonzero()
             if num_vots[0, columna] >= self._min_vots:
@@ -77,6 +76,8 @@ class Dataset(metaclass=ABCMeta):
         logging.debug("Mitjanes:\n\t%s", avg_item)
         avg_global = (avg_item.sum()) / avg_item.count_nonzero()
         logging.debug("Mitjana global:\n\t%s", avg_global)
+        # Càlcula la puntuació de cada objecte, ignorant aquells que no tenen
+        # el nombre mínim de vots requerits.
         for columna in range(self._columnas):
             if num_vots[0, columna] >= self._min_vots:
                 score[0, columna] = (
@@ -89,20 +90,48 @@ class Dataset(metaclass=ABCMeta):
             else:
                 score[0, columna] = 0
         logging.debug("Scores:\n\t%s", score)
+        #  Guarda la matriu com a atribut per reutilitzarla després i no
+        # requerir tornar-la a càlcular amb un altre usuari.
         self._scores_top_popular_items = score
 
-    def top_popular_items(self, min_vots, usuario: int):
+    def top_popular_items(
+        self, min_vots: int, usuario: int
+    ) -> List[Tuple[Data, float]]:
+        """
+
+
+        Parameters
+        ----------
+        min_vots : int
+            DESCRIPTION.
+        usuario : int
+            DESCRIPTION.
+
+        Returns
+        -------
+        List[Tuple[Data, float]]
+            DESCRIPTION.
+
+        """
         logging.debug(
             "Càlcul 'top_popular_items' amb min_vots: %s i usuari: %s.",
             min_vots,
             usuario,
         )
+        # Comprobació de que els arguments de la funció están dins del límit
+        # del dataset i evitar errors no controlats.
         assert 0 <= usuario < self._filas, "Usuari fora de rang."
         assert min_vots < self._filas, "Demanat més objectes comparat que disponibles."
+        # Comprova si ja existeix la matriu amb les puntuacions i si no la
+        # càlcula.
         if self._scores_top_popular_items is None or self._min_vots != min_vots:
             self._min_vots = min_vots
             self._score_top_popular_items()
         logging.debug("Retornant resultat.")
+        # Agafa les puntuacions de les columnes no valorades pel usuari donat
+        # i les ordena de major a menor puntuació, retornant l'objecte Data
+        # corresponent i la puntuació que té, per després poder obtenir el
+        # element al que es refereix.
         return sorted(
             [
                 (self._elementos[0][i], self._scores_top_popular_items[0, i])
@@ -113,109 +142,138 @@ class Dataset(metaclass=ABCMeta):
             reverse=True,
         )
 
-    def _similitud_other_users_also(self, usuario, posicio):
+    def _similitud_other_users_also(
+        self, usuario: lil_matrix, posicio: int
+    ) -> List[List[float]]:
+        """
+
+
+        Parameters
+        ----------
+        usuario : lil_matrix
+            DESCRIPTION.
+        posicio : int
+            DESCRIPTION.
+
+        Returns
+        -------
+        List[List[int, float]]
+            DESCRIPTION.
+
+        """
         logging.debug("Càlculant similituds amb usuari:\n\t%s: %s.", posicio, usuario)
-        u = usuario.toarray()
+        # Com que una fila ocupa molt menys d'espai de memoria es pot
+        # prescindir de la lil_matrix i utilitzar l'array per agilitar el
+        # càlcul.
+        user_u = usuario.toarray()
         similitudes = []
+        # Càlcula la similitus entre cada usuari i el usuari donat, guardant la
+        # fila de l'usuari per referencia i la similitud, per al càlcul
+        # posterior, quan es troba amb el mateix usuari, asigna 0.
         for fila in range(self._filas):
-            if fila != posicio:  # !!!
-                v = self._valoraciones.getrow(fila).toarray()
-                similitudes.append([fila, similitud(u, v)])
+            if fila != posicio:
+                user_v = self._valoraciones.getrow(fila).toarray()
+                similitudes.append([fila, similitud(user_u, user_v)])
             else:
                 similitudes.append([fila, 0])
-                # valoraciones_else = self._valoraciones[fila, :]
-                # suma = 0
-                # den1 = []
-                # den2 = []
-                # for i in range(self._columnas):
-                #     usu1 = valoraciones_usuario[0, i]
-                #     usu2 = valoraciones_else[0, i]
-                #     if not np.array_equal(usu1, 0) and not np.array_equal(usu2, 0):
-                #         suma += (valoraciones_usuario[0, i]) * valoraciones_else[0, i]
-                #         den1.append(valoraciones_usuario[0, i])
-                #         den2.append(valoraciones_else[0, i])
-                # den1 = [n ** 2 for n in den1]
-                # den2 = [n ** 2 for n in den2]
-                # den1 = sum(den1)
-                # den2 = sum(den2)
-                # if den1 != 0 or den2 != 0:
-                #     similitud = suma / ((((den1)) ** (1 / 2)) * ((den2)) ** (1 / 2))
-                #     dict_similitudes[fila] = similitud
         logging.debug("Retornant similituds.\n\t%s", similitudes)
+        # Retona el càcul de les similitus ordenades de major a menor.
         return sorted(similitudes, key=lambda x: x[1], reverse=True)
 
-    def other_users_also(self, k, usuario):
+    def other_users_also(self, k: int, usuario: int) -> List[Tuple[Data, float]]:
+        """
+
+
+        Parameters
+        ----------
+        k : int
+            DESCRIPTION.
+        usuario : int
+            DESCRIPTION.
+
+        Returns
+        -------
+        List[Tuple[Data, float]]
+            DESCRIPTION.
+
+        """
         logging.debug(
             "Càlcul 'other_users_also' amb k: %s i usuari: %s.", k, usuario,
         )
+        # Comprobació de que els arguments de la funció están dins del límit
+        # del dataset i evitar errors no controlats.
         assert 0 <= usuario < self._filas, "Usuari fora de rang."
         assert 0 < k < self._filas, "Demanat més objectes comparats que disponibles."
-        # score_dict = {}
-        u = self._valoraciones.getrow(usuario)
-        k_similars = self._similitud_other_users_also(u, usuario)[:k]
+        # Obté la lil_matrix unidimensional del usuari, per facilitar els
+        # càlcus.
+        user_u = self._valoraciones.getrow(usuario)
+        # Càlcula les similituds entre tots els usuaris i l'usuari demanat i
+        # agafa els k amb mayor similitud (k primers).
+        k_similars = self._similitud_other_users_also(user_u, usuario)[:k]
         scores = lil_matrix((1, self._columnas))
-        # avg_user = np.array([for user in k_similars ])
+        # Càlcula la mitja de les valoracions del k més similars usuaris
+        # (ignorant les valoracions amb 0) i les afegeix a la llista de
+        # reférencia i similitud.
         for i, user in enumerate(k_similars):
             k_similars[i].append(
                 (self._valoraciones[user[0], :].sum())
                 / (self._valoraciones[user[0], :].count_nonzero())
             )
         logging.debug("Similituds i mitjanes:\n\t%s", k_similars)
-        avg_u = (u.sum()) / (u.count_nonzero())
+        avg_u = (user_u.sum()) / (user_u.count_nonzero())
         logging.debug("Mitjana usuari: %s", avg_u)
+        # Càlcula la puntuació de cada columna, donats el k usuaris més próxims.
         for columna in range(self._columnas):
             denominador = 0
             numerador = 0
             for user in k_similars:
                 numerador += user[1] * (self._valoraciones[user[0], columna] - user[2])
                 denominador += user[1]
-            scores[0, columna] = avg_u * ((numerador) / (denominador))
+            scores[0, columna] = avg_u + ((numerador) / (denominador))
         logging.debug("Scores:\n\t%s", scores)
         logging.debug("Retornant resultat.")
+        # Agafa les puntuacions de les columnes no valorades pel usuari donat
+        # i les ordena de major a menor puntuació, retornant l'objecte Data
+        # corresponent i la puntuació que té, per després poder obtenir el
+        # element al que es refereix.
         return sorted(
             [
                 (self._elementos[0][i], scores[0, i])
                 for i in scores.nonzero()[1]
-                if i not in list(u.nonzero()[1])
+                if i not in list(user_u.nonzero()[1])
             ],
             key=lambda x: x[1],
             reverse=True,
         )
-        # medias = []
-        # for columna in range(self._columnas):
-        #     recuento = 0
-        #     suma = 0
-        #     for fila in usuarios_parecidos:
-        #         if self._valoraciones[fila[0], columna] != 0:
-        #             recuento += 1
-        #             suma += self._valoraciones[fila[0], columna]
-        #     if recuento == 0:
-        #         media = 0
-        #     else:
-        #         media = suma / recuento
-        #         medias.append(medias)
-        # for media, index in zip(medias, range(self._columnas)):
-        #     titulo = self._elementos[0][index]._titol
-        #     score_dict[titulo] = media
-        # indices = []
-        # for i in range(self._columnas):
-        #     print(self._valoraciones[usuario, i])
-        #     if self._valoraciones[usuario, i] == 0:
-
-        #         indices.append(i)
-        # print(indices)
-        # recomendadas = list(score_dict.items())
-        # peliculas_recomendadas = []
-        # for indice in indices:
-        #     peliculas_recomendadas.append(recomendadas[indice])
-        # peliculas_recomendadas.sort(key=lambda x: x[1], reverse=True)
-        # return peliculas_recomendadas
 
     @abstractmethod
     def read_data(self):
+        """
+        Funció abstracta per llegir les bases de dades, necessita ser
+        implemetada en cada clase derivada.
+
+        Raises
+        ------
+        NotImplementedError
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         raise NotImplementedError()
 
     def _save_pickle(self):
+        """
+        Guarda els atributs de la clase en un arxiu binari de lectura més
+        ràpida que els arxius csv.
+
+        Returns
+        -------
+        None.
+
+        """
         os.mkdir("./" + self._directory + "_pickle")
         with open(self._names_files_pickle[0], "wb") as fitxer_1, open(
             self._names_files_pickle[1], "wb"
@@ -240,6 +298,15 @@ class Dataset(metaclass=ABCMeta):
             pickle.dump(self._columnas, fitxer_8)
 
     def _load_pickle(self):
+        """
+        Carrega els atributs de la clase des de un arxiu binari de lectura més
+        ràpida que els arxius csv.
+
+        Returns
+        -------
+        None.
+
+        """
         with open(self._names_files_pickle[0], "rb") as fitxer_1, open(
             self._names_files_pickle[1], "rb"
         ) as fitxer_2, open(self._names_files_pickle[2], "rb") as fitxer_3, open(
@@ -262,278 +329,3 @@ class Dataset(metaclass=ABCMeta):
             self._usuarios = (pickle.load(fitxer_5), pickle.load(fitxer_6))
             self._filas = pickle.load(fitxer_7)
             self._columnas = pickle.load(fitxer_8)
-
-
-@dataclass
-class Pelicules(Dataset):
-    def read_data(self):
-        try:
-            if self._directory + "_pickle" in os.listdir("."):
-                logging.debug(
-                    "S'ha iniciat la lectura de la base de dades de películes a través de guardat binari."
-                )
-                self._load_pickle()
-                logging.debug(
-                    "S'ha finalitzat la lectura de la base de dades a través de guardat binari."
-                )
-            else:
-                logging.debug(
-                    "S'ha iniciat la lectura de la base de dades de películes a través de csv."
-                )
-                row = None
-                # Obrim arxiu amb les dades de les pelicules.
-                with open(
-                    self._directory + "/" + self._names_files[0], "r", encoding="utf8"
-                ) as csv_file:
-                    csvreader = csv.reader(csv_file)
-                    # Llegim la capçelera del arxiu csv.
-                    fields = next(csvreader)
-                    # Recorrem la resta de les lineas del arxiu.
-                    for row in csvreader:
-                        # Crea l'objecte película en cuestió de la línea i el
-                        # guarda al diccionari indexat per la posició en la coluna
-                        # de la matriu de self._valoraciones.
-                        self._elementos[0][self._columnas] = Pelicula(
-                            row[1], row[0], self._columnas
-                        )
-                        # Cada película té una posició única en la matriu i un
-                        # identificador únic, peró poden haver-hi películes amb
-                        # títols repetits, per no sobre escriure al diccionari
-                        # indexat pels títols de películes.
-                        repetida = True
-                        i = 0
-                        while repetida:
-                            # Comprovem si ja existeix un elements indexat per
-                            # aquest títol.
-                            try:
-                                self._elementos[1][row[1]]
-                            # Si no ho está, afegim l'index i la referencia a
-                            # l'objecte película.
-                            except KeyError:
-                                repetida = False
-                                self._elementos[1][row[1]] = self._elementos[0][
-                                    self._columnas
-                                ]
-                            # Si ja existeix un element amb aquest index.
-                            else:
-                                logging.warning(
-                                    "Element repetit:\n\tDades execució:\n\t\t%s \n\t\t%s \n\t\t%s",
-                                    row,
-                                    self._filas,
-                                    self._columnas,
-                                )
-                                # L'hi canviem el titulo afegint " (1)", o "(2)",
-                                # etc., depenent de quantes vegades está repetit el
-                                # títol i per tant de quantes vegades s'hagi
-                                # repetit aquest bucle.
-                                if i != 0:
-                                    row[1] = row[1][:-4]
-                                row[1] = row[1] + " (" + str(i + 1) + ")"
-                                self._elementos[0][self._columnas].titol = row[1]
-                                i += 1
-                        # Afegim la referéncia al diccionari indexat per la id de
-                        # la película.
-                        self._elementos[2][row[0]] = self._elementos[0][self._columnas]
-                        # Afegim al diccionarí de categories una llista de la
-                        # característica corresponent.
-                        row[2] = row[2].split("|")
-                        self._elementos[0][self._columnas].caracteristicas = {
-                            fields[2]: row[2]
-                        }
-                        self._columnas += 1
-                logging.debug("S'ha finalitzat la lectura de 'Movies's.")
-                # Obrim l'arxiu amb les valoracions dels usuaris.
-                with open(
-                    self._directory + "/" + self._names_files[1], "r", encoding="utf8"
-                ) as csv_file:
-                    csvreader = csv.reader(csv_file)
-                    # Llegim la capçelera del arxiu csv.
-                    fields = next(csvreader)
-                    # Per agilitar el proces i no tenir que fer tantes crides a
-                    # dins dels diccionaris i objectes "Pelicula()" i "Usuari()",
-                    # tindrem unes variables internes que guarden el nom i fila del
-                    # anterior usuari del qual s'ha llegit la valoració. I que
-                    # també guarden el nom i fila de la anterior pelicula del qual
-                    # s'ha llegit la valoració. Favoreix la lectura més rapída de
-                    # fitxers on les valoracions están ordenades per películes o
-                    # usuaris.
-                    prev_usuari_nom = None
-                    prev_usuari_fila = None
-                    prev_elem_colum = None
-                    prev_elem_iden = None
-                    # Recorrem la resta de les lineas del arxiu.
-                    for row in csvreader:
-                        if row[0] not in [
-                            usuari.nom for usuari in self._usuarios[0].values()
-                        ]:
-                            self._usuarios[0][self._filas] = Usuari(row[0], self._filas)
-                            self._usuarios[1][row[0]] = self._usuarios[0][self._filas]
-                            if self._valoraciones is None:
-                                self._valoraciones = lil_matrix((1, self._columnas))
-                            else:
-                                self._valoraciones.resize(
-                                    (self._filas + 1, self._columnas)
-                                )
-                            self._filas += 1
-                        if prev_usuari_nom == row[0]:
-                            fila = prev_usuari_fila
-                        else:
-                            prev_usuari_nom = row[0]
-                            fila = self._usuarios[1][row[0]].fila
-                            prev_usuari_fila = fila
-                        if prev_elem_iden == row[1]:
-                            columna = prev_elem_colum
-                        else:
-                            prev_elem_iden = row[1]
-                            columna = self._elementos[2][row[1]].columna
-                            prev_elem_colum = columna
-                        self._valoraciones[fila, columna] = float(row[2])
-                logging.debug(
-                    "S'ha finalitzat la lectura de la base de dades a través de csv."
-                )
-                logging.debug("S'ha iniciat el guardat binari de l'objecte.")
-                self._save_pickle()
-                logging.debug("S'ha finalitzat el guardat binari del objecte.")
-        except:
-            exc_tuple = sys.exc_info()
-            type_error = str(exc_tuple[0]).split()[1][:-1]
-            message = str(exc_tuple[1])
-            logging.error(
-                "S'ha parat l'excució, error:\n\t%s: %s\n Dades execució:\n\t%s \n\t%s \n\t%s",
-                type_error,
-                message,
-                row,
-                self._filas,
-                self._columnas,
-            )
-            raise exc_tuple[0](message) from exc_tuple[1]
-
-
-class Board_Games(Dataset):
-    def read_data(self):
-        try:
-            if self._directory + "_pickle" in os.listdir("."):
-                logging.debug(
-                    "S'ha iniciat la lectura de la base de dades de jocs a través de guardat binari."
-                )
-                self._load_pickle()
-                logging.debug(
-                    "S'ha finalitzat la lectura de la base de dades a través de guardat binari."
-                )
-            else:
-                logging.debug(
-                    "S'ha iniciat la lectura de la base de dades de jocs a través de csv."
-                )
-                row = None
-                fields_llegir = (3, 4, 8, 9, 10, 11, 12, 13, 18, 19, 20, 21, 28)
-                with open(
-                    self._directory + "/" + self._names_files[0], "r", encoding="utf8"
-                ) as csv_file:
-                    csvreader = csv.reader(csv_file)
-                    fields_1 = next(csvreader)
-                    for row in csvreader:
-                        self._elementos[0][self._columnas] = Game(
-                            row[1], row[0], self._columnas
-                        )
-                        repetida = True
-                        i = 0
-                        while repetida:
-                            try:
-                                self._elementos[1][row[1]]
-                            except KeyError:
-                                repetida = False
-                                self._elementos[1][row[1]] = self._elementos[0][
-                                    self._columnas
-                                ]
-                            else:
-                                logging.warning(
-                                    "Element repetit:\n\tDades execució:\n\t\t%s \n\t\t%s \n\t\t%s",
-                                    row,
-                                    self._filas,
-                                    self._columnas,
-                                )
-                                if i != 0:
-                                    row[1] = row[1][:-4]
-                                row[1] = row[1] + " (" + str(i + 1) + ")"
-                                self._elementos[0][self._columnas].titol = row[1]
-                                i += 1
-                        self._elementos[2][row[0]] = self._elementos[0][self._columnas]
-                        for i in fields_llegir:
-                            self._elementos[0][self._columnas].caracteristicas[
-                                fields_1[i]
-                            ] = row[i]
-                        for i in range(40, 48, 1):
-                            self._elementos[0][self._columnas].caracteristicas[
-                                fields_1[i]
-                            ] = bool(int(row[i]))
-                        self._columnas += 1
-                logging.debug("S'ha finalitzat la lectura basica de 'Game's.")
-                for j in range(1, 3):
-                    with open(
-                        self._directory + "/" + self._names_files[j],
-                        "r",
-                        encoding="utf8",
-                    ) as csv_file:
-                        csvreader = csv.reader(csv_file)
-                        fields = next(csvreader)
-                        for row in csvreader:
-                            for i in range(1, len(row), 1):
-                                self._elementos[2][row[0]].caracteristicas[
-                                    fields[i]
-                                ] = list(bool(int(row[i])))
-                logging.debug("S'ha finalitzat la lectura de 'Game's.")
-                with open(
-                    self._directory + "/" + self._names_files[3], "r", encoding="utf8"
-                ) as csv_file:
-                    csvreader = csv.reader(csv_file)
-                    fields = next(csvreader)
-                    prev_usuari_nom = None
-                    prev_usuari_fila = None
-                    prev_elem_colum = None
-                    prev_elem_iden = None
-                    for row in csvreader:
-                        if row[2] not in [
-                            usuari.nom for usuari in self._usuarios[0].values()
-                        ]:
-                            self._usuarios[0][self._filas] = Usuari(row[2], self._filas)
-                            self._usuarios[1][row[2]] = self._usuarios[0][self._filas]
-                            self._filas += 1
-                            if self._valoraciones is None:
-                                self._valoraciones = lil_matrix((1, self._columnas))
-                            else:
-                                self._valoraciones.resize(
-                                    (self._filas + 1, self._columnas)
-                                )
-                        if prev_usuari_nom == row[2]:
-                            fila = prev_usuari_fila
-                        else:
-                            prev_usuari_nom = row[2]
-                            fila = self._usuarios[1][row[2]].fila
-                            prev_usuari_fila = fila
-                        if prev_elem_iden == row[0]:
-                            columna = prev_elem_colum
-                        else:
-                            prev_elem_iden = row[0]
-                            columna = self._elementos[2][row[0]].columna
-                            prev_elem_colum = columna
-                        self._valoraciones[fila, columna] = float(row[1])
-                logging.debug(
-                    "S'ha finalitzat la lectura de la base de dades a través de csv."
-                )
-                logging.debug("S'ha iniciat el guardat binari de l'objecte.")
-                self._save_pickle()
-                logging.debug("S'ha finalitzat el guardat binari del objecte.")
-        except:
-            exc_tuple = sys.exc_info()
-            type_error = str(exc_tuple[0]).split()[1][:-1]
-            message = str(exc_tuple[1])
-            print(type_error + ": " + message)
-            logging.error(
-                "S'ha parat l'excució, error:\n\t%s: %s\n\tDades execució:\n\t\t%s \n\t\t%s \n\t\t%s",
-                type_error,
-                message,
-                row,
-                self._filas,
-                self._columnas,
-            )
-            raise exc_tuple[0](message) from exc_tuple[1]
