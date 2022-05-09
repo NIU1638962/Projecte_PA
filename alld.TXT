@@ -1,5 +1,0 @@
-import pickle
-with open("nom_fitxer.dat", "wb") as fitxer:
-	pickle.dump(objecte, fitxer)
-with open("nom_fitxer.dat", "rb") as fitxer:
-	pickle.load(fitxer)

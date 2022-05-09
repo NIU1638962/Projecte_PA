@@ -138,7 +138,7 @@ class BoardGames(Dataset):
                             for i in range(1, len(row), 1):
                                 self._elementos[2][row[0]].caracteristicas[
                                     fields[i]
-                                ] = list(bool(int(row[i])))
+                                ] = bool(int(row[i]))
                 logging.debug("S'ha finalitzat la lectura de 'Game's.")
                 # Obrim l'arxiu amb les valoracions dels usuaris.
                 with open(
