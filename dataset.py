@@ -14,6 +14,7 @@ from scipy.sparse import lil_matrix
 from data import Data
 from usuario import Usuari
 from operacions import similitud
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 @dataclass
@@ -291,6 +292,14 @@ class Dataset(metaclass=ABCMeta):
             key=lambda x: x[1],
             reverse=True,
         )
+
+    def because_you_liked(self, usuario: int):
+        item_features = [
+            self._elementos[0][i].caract_to_str() for i in range(self._columnas)
+        ]
+        tfidf = TfidfVectorizer(stop_words="english")
+        tfidf_matrix = tfidf.fit_transform(item_features).toarray()
+        return tfidf_matrix
 
     @abstractmethod
     def read_data(self):

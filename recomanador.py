@@ -192,25 +192,7 @@ def visualitza_rec(recomanacio: List[Tuple[Data, int]]):
         logging.debug("\n\t%s", recomanacio)
         for i, elem in enumerate(recomanacio):
             print(co.cpurple("Recomanació " + str(i + 1)))
-            print("\t" + co.cgreen("Títol") + ": " + elem[0].titol)
-            for cat in elem[0].caracteristicas.keys():
-                if (
-                    isinstance(elem[0].caracteristicas[cat], list)
-                    and len(elem[0].caracteristicas[cat]) > 0
-                ):
-                    print(
-                        "\t"
-                        + co.cgreen(cat)
-                        + ": "
-                        + ", ".join(elem[0].caracteristicas[cat])
-                    )
-                elif (
-                    isinstance(elem[0].caracteristicas[cat], bool)
-                    and elem[0].caracteristicas[cat]
-                ):
-                    print("\t" + co.cgreen(cat))
-                elif isinstance(elem[0].caracteristicas[cat], str):
-                    print("\t" + co.cgreen(cat) + ": " + elem[0].caracteristicas[cat])
+            elem[0].visualitza()
             print("\t" + co.cgreen("Score") + ": " + str(elem[1]))
         logging.info("Visualització finalitzada.")
 
@@ -234,4 +216,4 @@ def menu_select_recomanacio():
     print(co.cgreen(" (4) Sortir del menú."))
 
 
-recomanador()
+# recomanador()

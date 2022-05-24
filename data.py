@@ -6,7 +6,8 @@ Created on Wed Apr 20 13:00:59 2022
 
 from dataclasses import dataclass, field
 from typing import List, Dict
-from abc import ABCMeta
+from abc import ABCMeta, abstractclassmethod
+import console_messages as co
 
 
 @dataclass
@@ -71,6 +72,14 @@ class Data(metaclass=ABCMeta):
         """
         return self._columna
 
+    @abstractclassmethod
+    def visualitza(self):
+        raise NotImplementedError
+
+    @abstractclassmethod
+    def caract_to_str(self) -> str:
+        raise NotImplementedError
+
 
 @dataclass
 class Pelicula(Data):
@@ -89,6 +98,17 @@ class Pelicula(Data):
         """
         return self._caracteristicas
 
+    def visualitza(self):
+        print("\t" + co.cgreen("Títol") + ": " + self.titol)
+        for cat in self._caracteristicas.keys():
+            print("\t" + co.cgreen(cat) + ": " + ", ".join(self.caracteristicas[cat]))
+
+    def caract_to_str(self) -> str:
+        carac = ""
+        for cat in self._caracteristicas.keys():
+            carac += "|".join(self.caracteristicas[cat])
+        return carac
+
 
 @dataclass
 class Game(Data):
@@ -106,3 +126,38 @@ class Game(Data):
 
         """
         return self._caracteristicas
+
+    def visualitza(self):
+        print("\t" + co.cgreen("Títol") + ": " + self.titol)
+        for cat in self.caracteristicas.keys():
+            if (
+                isinstance(self.caracteristicas[cat], list)
+                and len(self.caracteristicas[cat]) > 0
+            ):
+                print(
+                    "\t" + co.cgreen(cat) + ": " + ", ".join(self.caracteristicas[cat])
+                )
+            elif (
+                isinstance(self.caracteristicas[cat], bool)
+                and self.caracteristicas[cat]
+            ):
+                print("\t" + co.cgreen(cat))
+            elif isinstance(self.caracteristicas[cat], str):
+                print("\t" + co.cgreen(cat) + ": " + self.caracteristicas[cat])
+
+    def caract_to_str(self) -> str:
+        carac = ""
+        for cat in self.caracteristicas.keys():
+            if (
+                isinstance(self.caracteristicas[cat], list)
+                and len(self.caracteristicas[cat]) > 0
+            ):
+                carac += "|".join(self.caracteristicas[cat])
+            elif (
+                isinstance(self.caracteristicas[cat], bool)
+                and self.caracteristicas[cat]
+            ):
+                carac += "|" + str(cat)
+            elif isinstance(self.caracteristicas[cat], str):
+                carac += "|" + self.caracteristicas[cat]
+        return carac
