@@ -186,6 +186,7 @@ def recomanador():
 
 def visualitza_rec(recomanacio: List[Tuple[Data, int]]):
     if recomanacio == []:
+        logging.warn("Recomanació está buit.")
         print(co.cpurple("No hi ha recomanacions."))
     elif recomanacio is not None:
         logging.info("Iniciant visualització de les recomanacions.")

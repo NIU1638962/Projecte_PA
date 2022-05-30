@@ -83,6 +83,19 @@ class Dataset(metaclass=ABCMeta):
         """
         return self._filas
 
+    @property
+    def columnes(self) -> int:
+        """
+        Getter del atribut _columnes.
+
+        Returns
+        -------
+        int
+            Nombre de columnes o nombre d'elements guardats en l'objecte.
+
+        """
+        return self._columnes
+
     def _score_top_popular_items(self):
         """
         Funció que càlcula les scores de cada columna ignorant valors en 0 i
@@ -293,13 +306,16 @@ class Dataset(metaclass=ABCMeta):
             reverse=True,
         )
 
-    def because_you_liked(self, usuario: int):
+    def _tfidf_matrix(self):
         item_features = [
             self._elementos[0][i].caract_to_str() for i in range(self._columnas)
         ]
         tfidf = TfidfVectorizer(stop_words="english")
         tfidf_matrix = tfidf.fit_transform(item_features).toarray()
         return tfidf_matrix
+
+    def because_you_liked(self, usuario: int):
+        tfidf_matrix = self._tfidf_matrix()
 
     @abstractmethod
     def read_data(self):

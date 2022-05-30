@@ -256,6 +256,22 @@ class TestPelicules(unittest.TestCase):
             ],
         )
 
+        def test_caract_to_str(self):
+            self.assertEqual(
+                [
+                    self.dataset.elementos[0][i].caract_to_str()
+                    for i in range(self.dataset.columnas)
+                ],
+                [
+                    "Adventure|Animation|Children|Comedy|Fantasy",
+                    "Adventure|Children|Fantasy",
+                    "Comedy|Romance",
+                    "Comedy|Drama|Romance",
+                    "Comedy",
+                    "Action|Crime|Thriller",
+                ],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
