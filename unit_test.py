@@ -256,21 +256,38 @@ class TestPelicules(unittest.TestCase):
             ],
         )
 
-        def test_caract_to_str(self):
-            self.assertEqual(
-                [
-                    self.dataset.elementos[0][i].caract_to_str()
-                    for i in range(self.dataset.columnas)
-                ],
-                [
-                    "Adventure|Animation|Children|Comedy|Fantasy",
-                    "Adventure|Children|Fantasy",
-                    "Comedy|Romance",
-                    "Comedy|Drama|Romance",
-                    "Comedy",
-                    "Action|Crime|Thriller",
-                ],
+    def test_caract_to_str(self):
+        self.assertEqual(
+            [
+                self.dataset.elementos[0][i].caract_to_str()
+                for i in range(self.dataset.columnas)
+            ],
+            [
+                "Adventure|Animation|Children|Comedy|Fantasy",
+                "Adventure|Children|Fantasy",
+                "Comedy|Romance",
+                "Comedy|Drama|Romance",
+                "Comedy",
+                "Action|Crime|Thriller",
+            ],
+        )
+
+    def test__tfidf_matrix(self):
+        self.assertTrue(
+            np.all(
+                self.dataset._scores_top_popular_items
+                == np.array(
+                    [
+                        [0, float, float, float, float, 0, 0, float, 0, 0],
+                        [0, float, 0, float, 0, 0, 0, float, 0, 0],
+                        [0, 0, 0, 0, float, 0, 0, 0, float, 0],
+                        [0, 0, 0, 0, float, 0, float, 0, float, 0],
+                        [0, 0, 0, 0, float, 0, 0, 0, 0, 0],
+                        [float, 0, 0, 0, 0, float, 0, 0, 0, float],
+                    ]
+                )
             )
+        )
 
 
 if __name__ == "__main__":

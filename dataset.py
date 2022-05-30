@@ -84,7 +84,7 @@ class Dataset(metaclass=ABCMeta):
         return self._filas
 
     @property
-    def columnes(self) -> int:
+    def columnas(self) -> int:
         """
         Getter del atribut _columnes.
 
@@ -94,7 +94,7 @@ class Dataset(metaclass=ABCMeta):
             Nombre de columnes o nombre d'elements guardats en l'objecte.
 
         """
-        return self._columnes
+        return self._columnas
 
     def _score_top_popular_items(self):
         """
@@ -315,7 +315,7 @@ class Dataset(metaclass=ABCMeta):
         return tfidf_matrix
 
     def because_you_liked(self, usuario: int):
-        tfidf_matrix = self._tfidf_matrix()
+        tfidf_matrix = lil_matrix(self._tfidf_matrix())
 
     @abstractmethod
     def read_data(self):
