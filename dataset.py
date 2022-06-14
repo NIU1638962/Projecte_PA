@@ -10,6 +10,7 @@ from abc import ABCMeta, abstractmethod
 import logging
 import pickle
 import os
+import numpy as np
 from scipy.sparse import lil_matrix
 from data import Data
 from usuario import Usuari
@@ -22,6 +23,7 @@ class Dataset(metaclass=ABCMeta):
 
     _directory: str
     _names_files: Tuple[str]
+    _pickle: bool = True
     _elementos: Tuple[Dict[str, Data]] = field(init=False, default=({}, {}, {}))
     _usuarios: Tuple[Dict[str, Usuari]] = field(init=False, default=({}, {}))
     _valoraciones: lil_matrix = field(init=False, default=None)
@@ -38,6 +40,7 @@ class Dataset(metaclass=ABCMeta):
         "usuarios(1).dat",
         "filas.dat",
         "columnas.dat",
+        "scores_top_popular_items.dat",
     )
 
     def __post_init__(self):
@@ -314,8 +317,45 @@ class Dataset(metaclass=ABCMeta):
         tfidf_matrix = tfidf.fit_transform(item_features).toarray()
         return tfidf_matrix
 
-    def because_you_liked(self, usuario: int):
+    def _perfil_usuari(self, usuari, tfidf_matrix):
+        matrix_aux = []
+        sumatorio = self._valoraciones[usuari].sum()
+        for columna, fila in zip(range(self._columnas), tfidf_matrix):
+            valoracion = self._valoraciones[usuari, columna]
+            vector_mult = valoracion * fila
+            matrix_aux.append((vector_mult))
+        matrix_aux = np.array(matrix_aux)
+        # matrix_aux=lil_matrix(matrix_aux)
+        return matrix_aux.sum(axis=0) / sumatorio
+
+    def _puntuacio(self, usuari):
         tfidf_matrix = lil_matrix(self._tfidf_matrix())
+        perfil_usuari = self._perfil_usuari(usuari, tfidf_matrix)
+        perfil = perfil_usuari.reshape((perfil_usuari.shape[1], perfil_usuari.shape[0]))
+        puntuaciones = tfidf_matrix.dot(perfil)
+        sumatorio1 = []
+        matriz_usuario_elementos_cuadrados = np.multiply(perfil, perfil)
+        sumatorio1 = matriz_usuario_elementos_cuadrados.sum(axis=0)
+        for i in range(tfidf_matrix.shape[0]):
+            for j in range(tfidf_matrix.shape[1]):
+                tfidf_matrix[i, j] = tfidf_matrix[i, j] ** 2
+        for i in range(puntuaciones.shape[0]):
+            divisor = ((sumatorio1) ** (1 / 2)) * ((tfidf_matrix[i]).sum()) ** (1 / 2)
+            puntuaciones[i] = puntuaciones[i] / divisor
+        return puntuaciones * 5
+
+    def because_you_liked(self, usuari: int):
+        user_u = self._valoraciones.getrow(usuari)
+        puntuaciones = self._puntuacio(usuari)
+        return sorted(
+            [
+                (self._elementos[0][i], puntuaciones[i][0])
+                for i in puntuaciones.nonzero()[0]
+                if i not in list(user_u.nonzero()[1])
+            ],
+            key=lambda x: x[1],
+            reverse=True,
+        )
 
     @abstractmethod
     def read_data(self):
@@ -347,27 +387,30 @@ class Dataset(metaclass=ABCMeta):
 
         """
         os.mkdir("./" + self._directory + "_pickle")
-        with open(self._names_files_pickle[0], "wb") as fitxer_1, open(
+        with open(self._names_files_pickle[0], "wb") as fitxer_0, open(
             self._names_files_pickle[1], "wb"
-        ) as fitxer_2, open(self._names_files_pickle[2], "wb") as fitxer_3, open(
+        ) as fitxer_1, open(self._names_files_pickle[2], "wb") as fitxer_2, open(
             self._names_files_pickle[3], "wb"
-        ) as fitxer_4, open(
+        ) as fitxer_3, open(
             self._names_files_pickle[4], "wb"
-        ) as fitxer_5, open(
+        ) as fitxer_4, open(
             self._names_files_pickle[5], "wb"
-        ) as fitxer_6, open(
+        ) as fitxer_5, open(
             self._names_files_pickle[6], "wb"
-        ) as fitxer_7, open(
+        ) as fitxer_6, open(
             self._names_files_pickle[7], "wb"
+        ) as fitxer_7, open(
+            self._names_files_pickle[8], "wb"
         ) as fitxer_8:
-            pickle.dump(self._valoraciones, fitxer_1)
-            pickle.dump(self._elementos[0], fitxer_2)
-            pickle.dump(self._elementos[1], fitxer_3)
-            pickle.dump(self._elementos[2], fitxer_4)
-            pickle.dump(self._usuarios[0], fitxer_5)
-            pickle.dump(self._usuarios[1], fitxer_6)
-            pickle.dump(self._filas, fitxer_7)
-            pickle.dump(self._columnas, fitxer_8)
+            pickle.dump(self._valoraciones, fitxer_0)
+            pickle.dump(self._elementos[0], fitxer_1)
+            pickle.dump(self._elementos[1], fitxer_2)
+            pickle.dump(self._elementos[2], fitxer_3)
+            pickle.dump(self._usuarios[0], fitxer_4)
+            pickle.dump(self._usuarios[1], fitxer_5)
+            pickle.dump(self._filas, fitxer_6)
+            pickle.dump(self._columnas, fitxer_7)
+            pickle.dump(self._scores_top_popular_items, fitxer_8)
 
     def _load_pickle(self):
         """
@@ -379,25 +422,28 @@ class Dataset(metaclass=ABCMeta):
         None.
 
         """
-        with open(self._names_files_pickle[0], "rb") as fitxer_1, open(
+        with open(self._names_files_pickle[0], "rb") as fitxer_0, open(
             self._names_files_pickle[1], "rb"
-        ) as fitxer_2, open(self._names_files_pickle[2], "rb") as fitxer_3, open(
+        ) as fitxer_1, open(self._names_files_pickle[2], "rb") as fitxer_2, open(
             self._names_files_pickle[3], "rb"
-        ) as fitxer_4, open(
+        ) as fitxer_3, open(
             self._names_files_pickle[4], "rb"
-        ) as fitxer_5, open(
+        ) as fitxer_4, open(
             self._names_files_pickle[5], "rb"
-        ) as fitxer_6, open(
+        ) as fitxer_5, open(
             self._names_files_pickle[6], "rb"
-        ) as fitxer_7, open(
+        ) as fitxer_6, open(
             self._names_files_pickle[7], "rb"
+        ) as fitxer_7, open(
+            self._names_files_pickle[8], "rb"
         ) as fitxer_8:
-            self._valoraciones = pickle.load(fitxer_1)
+            self._valoraciones = pickle.load(fitxer_0)
             self._elementos = (
+                pickle.load(fitxer_1),
                 pickle.load(fitxer_2),
                 pickle.load(fitxer_3),
-                pickle.load(fitxer_4),
             )
-            self._usuarios = (pickle.load(fitxer_5), pickle.load(fitxer_6))
-            self._filas = pickle.load(fitxer_7)
-            self._columnas = pickle.load(fitxer_8)
+            self._usuarios = (pickle.load(fitxer_4), pickle.load(fitxer_5))
+            self._filas = pickle.load(fitxer_6)
+            self._columnas = pickle.load(fitxer_7)
+            self._score_top_popular_items = pickle.load(fitxer_8)
