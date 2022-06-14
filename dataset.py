@@ -41,6 +41,7 @@ class Dataset(metaclass=ABCMeta):
         "filas.dat",
         "columnas.dat",
         "scores_top_popular_items.dat",
+        "min_vots.dat",
     )
 
     def __post_init__(self):
@@ -143,6 +144,7 @@ class Dataset(metaclass=ABCMeta):
         #  Guarda la matriu com a atribut per reutilitzarla després i no
         # requerir tornar-la a càlcular amb un altre usuari.
         self._scores_top_popular_items = score
+        self._save_pickle()
 
     def top_popular_items(
         self, min_vots: int, usuario: int
@@ -386,7 +388,9 @@ class Dataset(metaclass=ABCMeta):
         None.
 
         """
-        os.mkdir("./" + self._directory + "_pickle")
+        logging.debug("_save_pickle Dataset-subclass object")
+        if self._directory + "_pickle" not in os.listdir("."):
+            os.mkdir("./" + self._directory + "_pickle")
         with open(self._names_files_pickle[0], "wb") as fitxer_0, open(
             self._names_files_pickle[1], "wb"
         ) as fitxer_1, open(self._names_files_pickle[2], "wb") as fitxer_2, open(
@@ -401,7 +405,9 @@ class Dataset(metaclass=ABCMeta):
             self._names_files_pickle[7], "wb"
         ) as fitxer_7, open(
             self._names_files_pickle[8], "wb"
-        ) as fitxer_8:
+        ) as fitxer_8, open(
+            self._names_files_pickle[9], "wb"
+        ) as fitxer_9:
             pickle.dump(self._valoraciones, fitxer_0)
             pickle.dump(self._elementos[0], fitxer_1)
             pickle.dump(self._elementos[1], fitxer_2)
@@ -411,6 +417,7 @@ class Dataset(metaclass=ABCMeta):
             pickle.dump(self._filas, fitxer_6)
             pickle.dump(self._columnas, fitxer_7)
             pickle.dump(self._scores_top_popular_items, fitxer_8)
+            pickle.dump(self._min_vots, fitxer_9)
 
     def _load_pickle(self):
         """
@@ -422,6 +429,7 @@ class Dataset(metaclass=ABCMeta):
         None.
 
         """
+        logging.debug("_load_pickle Dataset-subclass object")
         with open(self._names_files_pickle[0], "rb") as fitxer_0, open(
             self._names_files_pickle[1], "rb"
         ) as fitxer_1, open(self._names_files_pickle[2], "rb") as fitxer_2, open(
@@ -436,7 +444,9 @@ class Dataset(metaclass=ABCMeta):
             self._names_files_pickle[7], "rb"
         ) as fitxer_7, open(
             self._names_files_pickle[8], "rb"
-        ) as fitxer_8:
+        ) as fitxer_8, open(
+            self._names_files_pickle[9], "rb"
+        ) as fitxer_9:
             self._valoraciones = pickle.load(fitxer_0)
             self._elementos = (
                 pickle.load(fitxer_1),
@@ -446,4 +456,5 @@ class Dataset(metaclass=ABCMeta):
             self._usuarios = (pickle.load(fitxer_4), pickle.load(fitxer_5))
             self._filas = pickle.load(fitxer_6)
             self._columnas = pickle.load(fitxer_7)
-            self._score_top_popular_items = pickle.load(fitxer_8)
+            self._scores_top_popular_items = pickle.load(fitxer_8)
+            self._min_vots = pickle.load(fitxer_9)

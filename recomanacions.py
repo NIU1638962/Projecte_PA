@@ -4,6 +4,7 @@ Created on Mon Jun 13 10:11:27 2022
 
 @author: Joel Tapia Salvador
 """
+import os
 from dataclasses import dataclass, field
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple, ClassVar
@@ -26,8 +27,8 @@ class Recomanacions(metaclass=ABCMeta):
         init=False, default_factory=list
     )
     _dataset: Dataset = field(init=False, default=None)
-    _directoris = ClassVar[Tuple[str]] = ("ml-latest-small", "archive_reduced")
-    _files = ClassVar[Tuple[Tuple[str]]] = (
+    _directoris: ClassVar[Tuple[str]] = ("ml-latest-small", "archive_reduced")
+    _files: ClassVar[Tuple[Tuple[str]]] = (
         ("movies.csv", "ratings.csv"),
         ("games.csv", "mechanics.csv", "subcategories.csv", "user_ratings.csv",),
     )
@@ -38,22 +39,29 @@ class Recomanacions(metaclass=ABCMeta):
         return self._dataset
 
     def __post_init__(self):
+        logging.debug("Iniciant __post_init__ Recomanacions-subclass object.")
         assert (
             0 <= self._opcio_dataset < len(self._directoris)
         ), "Error: Seleccioni opció vàlida."
         self._create_dataset()
-        if self._pickle:
+        if self._pickle and self._directoris[
+            self._opcio_dataset
+        ] + self._name_file_pickle in os.listdir("."):
+            logging.debug("Entrant a pickle.\n\t%s", self._pickle)
             self._load_pickle()
         else:
+            logging.debug("No entrant a pickle.\n\t%s", self._pickle)
             self._recomanacions = [None for i in range(self._dataset.filas)]
 
     def _save_pickle(self):
+        logging.debug("_save_pickle Recomanacions-subclass object")
         with open(
             self._directoris[self._opcio_dataset] + self._name_file_pickle, "wb"
         ) as file:
             pickle.dump(self, file)
 
     def _load_pickle(self):
+        logging.debug("_load_pickle Recomanacions-subclass object")
         with open(
             self._directoris[self._opcio_dataset] + self._name_file_pickle, "rb"
         ) as file:
@@ -61,18 +69,24 @@ class Recomanacions(metaclass=ABCMeta):
 
     def _create_dataset(self):
         if self._opcio_dataset == 0:
-            dataset = Pelicules(
+            self._dataset = Pelicules(
                 self._directoris[self._opcio_dataset],
                 self._files[self._opcio_dataset],
                 self._pickle,
+            )
+            logging.debug(
+                "Incialitzat 'dataset' a  objecte 'Películes'.\n\t%s", self._dataset
             )
         elif self._opcio_dataset == 1:
-            dataset = BoardGames(
+            self._dataset = BoardGames(
                 self._directoris[self._opcio_dataset],
                 self._files[self._opcio_dataset],
                 self._pickle,
             )
-        logging.debug("Incialitzat 'dataset' a  objecte 'Board_Games'.\n\t%s", dataset)
+            logging.debug(
+                "Incialitzat 'dataset' a  objecte 'Board_Games'.\n\t%s", self._dataset
+            )
+        self._dataset.read_data()
 
     @abstractmethod
     def recomana(self, usuari):
@@ -81,9 +95,9 @@ class Recomanacions(metaclass=ABCMeta):
 
 @dataclass
 class Recom_top_popular(Recomanacions):
-    _name_file_pickle: str = field(
-        init=False, default=super()._name_file_pickle[:-3] + "_top_popular.dat"
-    )
+    def __post_init__(self):
+        super().__post_init__()
+        self._name_file_pickle = super()._name_file_pickle[:-3] + "_top_popular.dat"
 
     def recomana(self, usuari: int):
         if self._recomanacions[usuari] is None:
@@ -91,14 +105,14 @@ class Recom_top_popular(Recomanacions):
                 self._min_vots, usuari
             )
             self._save_pickle()
-        return self._recomanacions[usuari][self._k_usuaris]
+        return self._recomanacions[usuari][: self._k_usuaris]
 
 
 @dataclass
 class Recom_other_users(Recomanacions):
-    _name_file_pickle: str = field(
-        init=False, default=super()._name_file_pickle[:-3] + "_other_users.dat"
-    )
+    def __post_init__(self):
+        super().__post_init__()
+        self._name_file_pickle = super()._name_file_pickle[:-3] + "_other_users.dat"
 
     def recomana(self, usuari: int):
         if self._recomanacions[usuari] is None:
@@ -106,17 +120,17 @@ class Recom_other_users(Recomanacions):
                 self._k_usuaris, usuari
             )
             self._save_pickle()
-        return self._recomanacions[usuari][self._k_usuaris]
+        return self._recomanacions[usuari][: self._k_usuaris]
 
 
 @dataclass
 class Recom_you_liked(Recomanacions):
-    _name_file_pickle: str = field(
-        init=False, default=super()._name_file_pickle[:-3] + "_you_liked.dat"
-    )
+    def __post_init__(self):
+        super().__post_init__()
+        self._name_file_pickle = super()._name_file_pickle[:-3] + "_you_liked.dat"
 
     def recomana(self, usuari):
         if self._recomanacions[usuari] is None:
             self._recomanacions[usuari] = self._dataset.because_you_liked(usuari)
             self._save_pickle()
-        return self._recomanacions[usuari][self._k_usuaris]
+        return self._recomanacions[usuari][: self._k_usuaris]
