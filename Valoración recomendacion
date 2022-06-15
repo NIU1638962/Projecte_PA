@@ -1,0 +1,34 @@
+def MAE(predicciones, valoraciones_usuario):
+    numerador=abs(predicciones-valoraciones_usuario)
+    denominador=numerador.size
+    return(numerador.sum()/denominador)
+
+def precision(predicciones, valoraciones_usuario, min_score):
+    dict_valoraciones={}
+    top_valoraciones=int(input("Introduzca un mínimo de votos: "))
+    for prediccion, valoracion in zip(predicciones, valoraciones_usuario):
+        dict_valoraciones[prediccion]=valoracion
+    tupla_valoraciones=sorted(dict_valoraciones.items())
+    tupla_valoraciones=tupla_valoraciones[:top_valoraciones]
+    cont=0
+    for nota in tupla_valoraciones:
+        if nota[1]>min_score:
+            cont+=1
+    return (cont/top_valoraciones)
+
+def recall(predicciones, valoraciones_usuario, min_score):
+    dict_valoraciones={}
+    top_valoraciones=int(input("Introduzca un mínimo de votos: "))
+    for prediccion, valoracion in zip(predicciones, valoraciones_usuario):
+        dict_valoraciones[prediccion]=valoracion
+    tupla_valoraciones=sorted(dict_valoraciones.items())
+    numerador=0
+    denominador=0
+    for nota in range(len(tupla_valoraciones)):
+        if tupla_valoraciones[nota][1]>min_score and nota<top_valoraciones:
+            numerador+=1
+            denominador+=1
+        else:
+            denominador+=1
+    return (numerador/denominador)
+ 
