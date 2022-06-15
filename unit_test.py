@@ -461,6 +461,10 @@ class TestPelicules(unittest.TestCase):
             )
         )
 
+    def test__similitud(self):
+        self.assertTrue(True)
+        print(self.dataset._similitud(0))
+
 
 if __name__ == "__main__":
     unittest.main()

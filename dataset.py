@@ -320,31 +320,23 @@ class Dataset(metaclass=ABCMeta):
         return tfidf_matrix
 
     def _perfil_usuari(self, usuari, tfidf_matrix):
-        valoracions = self._valoraciones.getrow(usuari).toarray()
-        return (
-            valoracions.reshape((valoracions.shape[1], valoracions.shape[0]))
-            * tfidf_matrix
-        ).sum(axis=0) / self._valoraciones[usuari].sum()
+        valoraciones = self._valoraciones.getrow(usuari).toarray()
+        return valoraciones.dot(tfidf_matrix) / valoraciones.sum()
 
-    def _puntuacio(self, usuari):
-        tfidf_matrix = lil_matrix(self._tfidf_matrix())
+    def _similitud(self, usuari):
+        tfidf_matrix = self._tfidf_matrix()
         perfil_usuari = self._perfil_usuari(usuari, tfidf_matrix)
-        perfil = perfil_usuari.reshape((perfil_usuari.shape[1], perfil_usuari.shape[0]))
-        puntuaciones = tfidf_matrix.dot(perfil)
-        sumatorio1 = []
-        matriz_usuario_elementos_cuadrados = np.multiply(perfil, perfil)
-        sumatorio1 = matriz_usuario_elementos_cuadrados.sum(axis=0)
-        for i in range(tfidf_matrix.shape[0]):
-            for j in range(tfidf_matrix.shape[1]):
-                tfidf_matrix[i, j] = tfidf_matrix[i, j] ** 2
-        for i in range(puntuaciones.shape[0]):
-            divisor = ((sumatorio1) ** (1 / 2)) * ((tfidf_matrix[i]).sum()) ** (1 / 2)
-            puntuaciones[i] = puntuaciones[i] / divisor
-        return puntuaciones * 5
+        tfidf_matrix = tfidf_matrix.reshape(
+            (tfidf_matrix.shape[1], tfidf_matrix.shape[0])
+        )
+        puntuaciones = perfil_usuari.dot(tfidf_matrix)
+        p = np.sqrt(np.square(perfil_usuari).sum())
+        sumatorio = np.sqrt((np.square(tfidf_matrix)).sum(0))
+        return puntuaciones / (p * sumatorio)
 
     def because_you_liked(self, usuari: int):
         user_u = self._valoraciones.getrow(usuari)
-        puntuaciones = self._puntuacio(usuari)
+        puntuaciones = self._similitud(usuari)
         return sorted(
             [
                 (self._elementos[0][i], puntuaciones[i][0])
