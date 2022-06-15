@@ -321,14 +321,11 @@ class Dataset(metaclass=ABCMeta):
 
     def _perfil_usuari(self, usuari, tfidf_matrix):
         matrix_aux = []
-        sumatorio = self._valoraciones[usuari].sum()
         for columna, fila in zip(range(self._columnas), tfidf_matrix):
-            valoracion = self._valoraciones[usuari, columna]
-            vector_mult = valoracion * fila
-            matrix_aux.append((vector_mult))
+            matrix_aux.append(self._valoraciones[usuari, columna] * fila)
         matrix_aux = np.array(matrix_aux)
         # matrix_aux=lil_matrix(matrix_aux)
-        return matrix_aux.sum(axis=0) / sumatorio
+        return matrix_aux.sum(axis=0) / self._valoraciones[usuari].sum()
 
     def _puntuacio(self, usuari):
         tfidf_matrix = lil_matrix(self._tfidf_matrix())

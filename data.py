@@ -15,6 +15,24 @@ class Data(metaclass=ABCMeta):
     _titol: str
     _identificador: str
     _columna: int
+    _caracteristicas: Dict[str, List[str]] = field(init=False, default_factory=dict)
+
+    @property
+    def caracteristicas(self) -> Dict[str, List[str]]:
+        """
+        Getter del atribut _caracteristicas.
+
+        Returns
+        -------
+        Dict[str, List[str]]
+            Característiques identificatories del objecte.
+
+        """
+        return self._caracteristicas
+
+    @caracteristicas.setter
+    def caracteristicas(self, new_value):
+        self._caracteristicas = new_value
 
     @property
     def titol(self) -> str:
@@ -83,21 +101,6 @@ class Data(metaclass=ABCMeta):
 
 @dataclass
 class Pelicula(Data):
-    _caracteristicas: Dict[str, List[str]] = field(init=False, default_factory=dict)
-
-    @property
-    def caracteristicas(self) -> Dict[str, List[str]]:
-        """
-        Getter del atribut _caracteristicas.
-
-        Returns
-        -------
-        Dict[str, List[str]]
-            Característiques identificatories del objecte.
-
-        """
-        return self._caracteristicas
-
     def visualitza(self):
         print("\t" + co.cgreen("Títol") + ": " + self.titol)
         for cat in self._caracteristicas.keys():
@@ -112,21 +115,6 @@ class Pelicula(Data):
 
 @dataclass
 class Game(Data):
-    _caracteristicas: Dict[str, List[str]] = field(init=False, default_factory=dict)
-
-    @property
-    def caracteristicas(self) -> Dict[str, List[str]]:
-        """
-        Getter del atribut _caracteristicas.
-
-        Returns
-        -------
-        Dict[str, List[str]]
-            Característiques identificatories del objecte.
-
-        """
-        return self._caracteristicas
-
     def visualitza(self):
         print("\t" + co.cgreen("Títol") + ": " + self.titol)
         for cat in self.caracteristicas.keys():

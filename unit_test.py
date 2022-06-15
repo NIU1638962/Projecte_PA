@@ -344,6 +344,10 @@ class TestPelicules(unittest.TestCase):
             )
         )
 
+    def test__perfil_usuari(self):
+        tfidf_matrix = self.dataset._tfidf_matrix()
+        print(self.dataset._perfil_usuari(0, tfidf_matrix))
+
 
 if __name__ == "__main__":
     unittest.main()
