@@ -47,9 +47,19 @@ class Dataset(metaclass=ABCMeta):
         "min_vots.dat",
     )
 
-    def __post_init__(self):
+    def inicia(self, n, theta, n_recomanacions):
         self._names_files_pickle = tuple(
-            i[:-4] + "_" + str(self._min_vots) + "_" + str(self._k_usuaris)
+            i[:-4]
+            + "_"
+            + str(n)
+            + "_"
+            + str(theta)
+            + "_"
+            + str(n_recomanacions)
+            + "_"
+            + str(self._min_vots)
+            + "_"
+            + str(self._k_usuaris)
             for i in self._names_files_pickle
         )
         if self._test:
@@ -113,7 +123,7 @@ class Dataset(metaclass=ABCMeta):
         return self._columnas
 
     def generate_training_set(self, n_first):
-        temp = self._valoraciones
+        temp = self._valoraciones.copy()
         self._valoraciones = lil_matrix((self._filas, self._columnas))
         self._valoraciones[:, :n_first] = temp[:, :n_first]
         self._save_pickle()

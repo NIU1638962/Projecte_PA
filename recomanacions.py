@@ -49,12 +49,12 @@ class Recomanacions(metaclass=ABCMeta):
     def max_pun(self):
         return self._max_pun[self._opcio_dataset]
 
-    def inicia(self, min_vots, k_usuaris, test):
+    def inicia(self, n, theta, min_vots, k_usuaris, test):
         logging.debug("Iniciant inicia Recomanacions-subclass object.")
         assert (
             0 <= self._opcio_dataset < len(self._directoris)
         ), "Error: Seleccioni opció de dataset vàlida."
-        self._create_dataset(min_vots, k_usuaris, test)
+        self._create_dataset(n, theta, min_vots, k_usuaris, test)
         logging.debug(
             "Directori: \n\t%s",
             "./" + self._directoris[self._opcio_dataset] + "_pickle",
@@ -85,7 +85,7 @@ class Recomanacions(metaclass=ABCMeta):
         ) as file:
             self._recomanacions = pickle.load(file)
 
-    def _create_dataset(self, min_vots, k_usuaris, test):
+    def _create_dataset(self, n, theta, min_vots, k_usuaris, test):
         if self._opcio_dataset == 0:
             self._dataset = Pelicules(
                 self._directoris[self._opcio_dataset],
@@ -112,6 +112,7 @@ class Recomanacions(metaclass=ABCMeta):
             logging.debug(
                 "Incialitzat 'dataset' a  objecte 'Board_Games'.\n\t%s", self._dataset
             )
+        self._dataset.inicia(n, theta, self._n_recomanacions)
         self._dataset.read_data()
 
     @abstractmethod
@@ -135,7 +136,7 @@ class Recomanacions(metaclass=ABCMeta):
 
 @dataclass
 class Recom_top_popular(Recomanacions):
-    def inicia(self, min_vots, k_usuaris, test):
+    def inicia(self, n, theta, min_vots, k_usuaris, test):
         self._name_file_pickle = (
             super()._name_file_pickle[:-4]
             + "_top_popular_"
@@ -148,7 +149,7 @@ class Recom_top_popular(Recomanacions):
         if test:
             self._name_file_pickle += "_test"
         self._name_file_pickle += ".dat"
-        super().inicia(min_vots, k_usuaris, test)
+        super().inicia(n, theta, min_vots, k_usuaris, test)
 
     def unsorted_undata_recomana(self, usuari: int):
         return self._dataset.top_popular_items(usuari)
@@ -156,7 +157,7 @@ class Recom_top_popular(Recomanacions):
 
 @dataclass
 class Recom_other_users(Recomanacions):
-    def inicia(self, min_vots, k_usuaris, test):
+    def inicia(self, n, theta, min_vots, k_usuaris, test):
         self._name_file_pickle = (
             super()._name_file_pickle[:-4]
             + "_other_users_"
@@ -169,7 +170,7 @@ class Recom_other_users(Recomanacions):
         if test:
             self._name_file_pickle += "_test"
         self._name_file_pickle += ".dat"
-        super().inicia(min_vots, k_usuaris, test)
+        super().inicia(n, theta, min_vots, k_usuaris, test)
 
     def unsorted_undata_recomana(self, usuari: int):
         return self._dataset.other_users_also(usuari)
@@ -177,7 +178,7 @@ class Recom_other_users(Recomanacions):
 
 @dataclass
 class Recom_you_liked(Recomanacions):
-    def inicia(self, min_vots, k_usuaris, test):
+    def inicia(self, n, theta, min_vots, k_usuaris, test):
         self._name_file_pickle = (
             super()._name_file_pickle[:-4]
             + "_you_liked_"
@@ -190,7 +191,7 @@ class Recom_you_liked(Recomanacions):
         if test:
             self._name_file_pickle += "_test"
         self._name_file_pickle += ".dat"
-        super().inicia(min_vots, k_usuaris, test)
+        super().inicia(n, theta, min_vots, k_usuaris, test)
 
     def unsorted_undata_recomana(self, usuari):
         return self._dataset.because_you_liked(usuari)

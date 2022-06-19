@@ -6,8 +6,8 @@ Created on Tue Jun 14 19:40:30 2022
 """
 from recomanador import Recomanador
 
-N = 100
-THETA = 0.5
+N = 1000
+THETA = 0.8
 N_RECOMANACIONS = 5
 MIN_VOTS = 10
 K_USUARIS = 10

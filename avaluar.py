@@ -82,7 +82,13 @@ class Avaluar:
                 "Incialitzat 'recomanacio' a  objecte 'Recom_you_liked'.\n\t%s",
                 self._recomanacio,
             )
-        self._recomanacio.inicia(min_vots, k_usuaris, self._test)
+        self._recomanacio.inicia(
+            self._n,
+            self._theta / self._recomanacio.max_pun,
+            min_vots,
+            k_usuaris,
+            self._test,
+        )
 
     def recomana(self, usuari: int):
         return self._recomanacio.recomana(usuari)
@@ -112,7 +118,9 @@ class Avaluar_Test(Avaluar):
             + "_"
             + str(self._n)
             + "_"
-            + str(opcio_dataset)
+            + str(self._opcio_recomanacio)
+            + "_"
+            + str(self._theta / self._recomanacio.max_pun)
             + "_"
             + str(n_recomanacions)
             + "_"
@@ -132,19 +140,14 @@ class Avaluar_Test(Avaluar):
             logging.debug("No entrant a pickle.\n\t%s", self._pickle)
             self._resultat = [None for i in range(self._recomanacio.dataset.filas)]
             self._original = self._recomanacio.dataset.generate_training_set(self._n)
+            self._save_pickle()
 
     def _save_pickle(self):
         logging.debug("_save_pickle Avaluar-class object")
         with open(
-            self._directoris[self._opcio_dataset]
-            + "_pickle/"
-            + self._name_file_pickle[0],
-            "wb",
+            self._recomanacio.directori + "_pickle/" + self._name_file_pickle[0], "wb",
         ) as file1, open(
-            self._directoris[self._opcio_dataset]
-            + "_pickle/"
-            + self._name_file_pickle[1],
-            "wb",
+            self._recomanacio.directori + "_pickle/" + self._name_file_pickle[1], "wb",
         ) as file2:
             pickle.dump(self._original, file1)
             pickle.dump(self._resultat, file2)
@@ -152,15 +155,9 @@ class Avaluar_Test(Avaluar):
     def _load_pickle(self):
         logging.debug("_load_pickle Avaluar-class object")
         with open(
-            self._directoris[self._opcio_dataset]
-            + "_pickle/"
-            + self._name_file_pickle[0],
-            "rb",
+            self._recomanacio.directori + "_pickle/" + self._name_file_pickle[0], "rb",
         ) as file1, open(
-            self._directoris[self._opcio_dataset]
-            + "_pickle/"
-            + self._name_file_pickle[1],
-            "rb",
+            self._recomanacio.directori + "_pickle/" + self._name_file_pickle[1], "rb",
         ) as file2:
             self._original = pickle.load(file1)
             self._resultat = pickle.load(file2)
@@ -168,7 +165,7 @@ class Avaluar_Test(Avaluar):
     def recomana(self, usuari):
         if self._resultat[usuari] is None:
             resultats = self._recomanacio.unsorted_undata_recomana(usuari)
-            test_u = self._original[usuari]
+            test_u = self._original[usuari].copy()
             self._resultat[usuari] = (
                 self._recomanacio.recomana(usuari),
                 [
@@ -181,7 +178,7 @@ class Avaluar_Test(Avaluar):
                         reverse=True,
                     )
                     if i[1] > self._theta
-                ][: self._recomanacio.n_recomanacions],
+                ],
                 (
                     self._mae(resultats, test_u),
                     self._precision(resultats, test_u),
@@ -203,7 +200,9 @@ class Avaluar_Test(Avaluar):
     def _precision(self, resultats: lil_matrix, test_u: lil_matrix):
         dtype = [("resultats", float), ("test_u", float)]
         resultats = resultats[:, self._n :].toarray()
+        resultats = resultats.reshape((resultats.shape[1]))
         test_u = test_u[:, self._n :].toarray()
+        test_u = test_u.reshape((test_u.shape[1]))
         con = test_u == 0
         resultats[con] = 0
         temp = np.array([(i, j) for i, j in zip(resultats, test_u)], dtype=dtype)
@@ -216,7 +215,9 @@ class Avaluar_Test(Avaluar):
     def _recall(self, resultats: lil_matrix, test_u: lil_matrix):
         dtype = [("resultats", float), ("test_u", float)]
         resultats = resultats[:, self._n :].toarray()
+        resultats = resultats.reshape((resultats.shape[1]))
         test_u = test_u[:, self._n :].toarray()
+        test_u = test_u.reshape((test_u.shape[1]))
         con = test_u == 0
         resultats[con] = 0
         temp = np.array([(i, j) for i, j in zip(resultats, test_u)], dtype=dtype)
@@ -241,16 +242,16 @@ class Avaluar_Test(Avaluar):
         elif resultat is not None:
             logging.info("Iniciant visualització de les recomanacions.")
             logging.debug("\n\t%s", resultat)
-            print(co.cpurple("Millors prediccions del sistema:"))
+            print(co.cpurple("\nMillors prediccions del sistema:"))
             for elem in resultat[0]:
                 print("\t" + co.cgreen("Identificador: ") + str(elem[0].titol))
                 print("\t" + co.cgreen("Score: ") + str(elem[1]))
-            print(co.cpurple("Valoracions de l'usuari que superen el llindar':"))
+            print(co.cpurple("\nValoracions de l'usuari que superen el llindar':"))
             for elem in resultat[1]:
                 print("\t" + co.cgreen("Identificador: ") + str(elem[0].titol))
                 print("\t" + co.cgreen("Score: ") + str(elem[1]))
-            print(co.cpurple("Mesures de comparació: "))
-            for nom, pun, in enumerate(
+            print(co.cpurple("\nMesures de comparació: "))
+            for nom, pun in zip(
                 ("Mean absolute error", "Precision", "Recall"), resultat[2]
             ):
                 print("\t" + co.cgreen(nom + ": ") + str(pun))
