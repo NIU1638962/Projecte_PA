@@ -205,9 +205,17 @@ class Avaluar_Test(Avaluar):
         resultats = resultats[:, self._n :]
         test_u = lil_matrix(test_u[:, self._n :])
         con = test_u != 0
-        return (np.abs(resultats[con] - test_u[con])).sum() / (
-            (test_u[con]).count_nonzero()
-        )
+        num = (np.abs(resultats[con] - test_u[con])).sum()
+        den = (test_u[con]).count_nonzero()
+        try:
+            res = num / den
+        except ZeroDivisionError:
+            if 0 <= num < 0.01:
+                return 0
+            else:
+                return float("inf")
+        else:
+            return res
 
     def _precision(self, resultats: lil_matrix, test_u: lil_matrix):
         dtype = [("resultats", float), ("test_u", float)]
@@ -222,7 +230,17 @@ class Avaluar_Test(Avaluar):
             self._recomanacio.n_recomanacions
         ]
         con = temp["test_u"] > self._theta
-        return (temp[con].size) / self._recomanacio.n_recomanacions
+        num = temp[con].size
+        den = self._recomanacio.n_recomanacions
+        try:
+            res = num / den
+        except ZeroDivisionError:
+            if 0 <= num < 0.01:
+                return 0
+            else:
+                return float("inf")
+        else:
+            return res
 
     def _recall(self, resultats: lil_matrix, test_u: lil_matrix):
         dtype = [("resultats", float), ("test_u", float)]
@@ -238,7 +256,17 @@ class Avaluar_Test(Avaluar):
         ]
         con1 = temp["test_u"] > self._theta
         con2 = test_u > self._theta
-        return (temp[con1].size) / (test_u[con2].size)
+        num = temp[con1].size
+        den = test_u[con2].size
+        try:
+            res = num / den
+        except ZeroDivisionError:
+            if 0 <= num < 0.01:
+                return 0
+            else:
+                return float("inf")
+        else:
+            return res
 
     def visualitza(
         self,
@@ -258,7 +286,7 @@ class Avaluar_Test(Avaluar):
             for elem in resultat[0]:
                 print("\t" + co.cgreen("Identificador: ") + str(elem[0].titol))
                 print("\t" + co.cgreen("Score: ") + str(elem[1]))
-            print(co.cpurple("\nValoracions de l'usuari que superen el llindar':"))
+            print(co.cpurple("\nValoracions de l'usuari que superen el llindar:"))
             for elem in resultat[1]:
                 print("\t" + co.cgreen("Identificador: ") + str(elem[0].titol))
                 print("\t" + co.cgreen("Score: ") + str(elem[1]))
