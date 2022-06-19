@@ -35,7 +35,15 @@ class Pelicules(Dataset):
         """
         try:
             # Comprovació de si existeixenel arxius binaris del dataset.
-            if self._directory + "_pickle" in os.listdir("."):
+            if (
+                self._directory + "_pickle" in os.listdir(".")
+                and self._pickle
+                and [
+                    i.split("/")[1] in os.listdir("./" + self._directory + "_pickle")
+                    for i in self._names_files_pickle
+                ].count(True)
+                == len(self._names_files_pickle)
+            ):
                 logging.debug(
                     "S'ha iniciat la lectura de la base de dades de películes a través de guardat binari."
                 )
@@ -180,13 +188,14 @@ class Pelicules(Dataset):
                 logging.debug(
                     "S'ha finalitzat la lectura de la base de dades a través de csv."
                 )
-                # Una vegada llegit el dataset completament a través dels
-                # arxius csv, es guarden el atributs en arxius binaris per
-                # aumentar la velocitat de lectura la proxima vegada que es
-                # carregui el dataset.
-                logging.debug("S'ha iniciat el guardat binari de l'objecte.")
-                self._save_pickle()
-                logging.debug("S'ha finalitzat el guardat binari del objecte.")
+                if self._pickle:
+                    # Una vegada llegit el dataset completament a través dels
+                    # arxius csv, es guarden el atributs en arxius binaris per
+                    # aumentar la velocitat de lectura la proxima vegada que es
+                    # carregui el dataset.
+                    logging.debug("S'ha iniciat el guardat binari de l'objecte.")
+                    self._save_pickle()
+                    logging.debug("S'ha finalitzat el guardat binari del objecte.")
         except:
             # Recupera el tipus d'error, el guarda en l'arxiu de logging i
             # aixeca el error per para l'execució e infromar al programa

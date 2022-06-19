@@ -23,14 +23,17 @@ class Dataset(metaclass=ABCMeta):
 
     _directory: str
     _names_files: Tuple[str]
+    _max_pun: int = 10
+    _min_vots: int = 10
+    _k_usuaris: int = 10
     _pickle: bool = True
+    _test: bool = False
     _elementos: Tuple[Dict[str, Data]] = field(init=False, default=({}, {}, {}))
     _usuarios: Tuple[Dict[str, Usuari]] = field(init=False, default=({}, {}))
     _valoraciones: lil_matrix = field(init=False, default=None)
     _columnas: int = field(init=False, default=0)
     _filas: int = field(init=False, default=0)
     _scores_top_popular_items: lil_matrix = field(init=False, default=None)
-    _min_vots: int = field(init=False, default=None)
     _names_files_pickle: ClassVar[Tuple[str]] = (
         "valoraciones.dat",
         "elementos(0).dat",
@@ -45,6 +48,15 @@ class Dataset(metaclass=ABCMeta):
     )
 
     def __post_init__(self):
+        self._names_files_pickle = tuple(
+            i[:-4] + "_" + str(self._min_vots) + "_" + str(self._k_usuaris)
+            for i in self._names_files_pickle
+        )
+        if self._test:
+            self._names_files_pickle = tuple(
+                i + "_test" for i in self._names_files_pickle
+            )
+        self._names_files_pickle = tuple(i + ".dat" for i in self._names_files_pickle)
         self._names_files_pickle = tuple(
             self._directory + "_pickle" + "/" + i for i in self._names_files_pickle
         )
@@ -100,6 +112,13 @@ class Dataset(metaclass=ABCMeta):
         """
         return self._columnas
 
+    def generate_training_set(self, n_first):
+        temp = self._valoraciones
+        self._valoraciones = lil_matrix((self._filas, self._columnas))
+        self._valoraciones[:, :n_first] = temp[:, :n_first]
+        self._save_pickle()
+        return temp
+
     def _score_top_popular_items(self):
         """
         Funció que càlcula les scores de cada columna ignorant valors en 0 i
@@ -144,11 +163,10 @@ class Dataset(metaclass=ABCMeta):
         #  Guarda la matriu com a atribut per reutilitzarla després i no
         # requerir tornar-la a càlcular amb un altre usuari.
         self._scores_top_popular_items = score
-        self._save_pickle()
+        if self._pickle:
+            self._save_pickle()
 
-    def top_popular_items(
-        self, min_vots: int, usuario: int
-    ) -> List[Tuple[Data, float]]:
+    def top_popular_items(self, usuario: int) -> List[Tuple[Data, float]]:
         """
         Càlcula i genera una llista ordenada (de més a menys) dels elements
         que més puntuació tenen, basat en les valoracions dels altres usuaris,
@@ -173,32 +191,25 @@ class Dataset(metaclass=ABCMeta):
         """
         logging.debug(
             "Càlcul 'top_popular_items' amb min_vots: %s i usuari: %s.",
-            min_vots,
+            self._min_vots,
             usuario,
         )
         # Comprobació de que els arguments de la funció están dins del límit
         # del dataset i evitar errors no controlats.
         assert 0 <= usuario < self._filas, "Usuari fora de rang."
-        assert min_vots < self._filas, "Demanat més objectes comparat que disponibles."
+        assert (
+            self._min_vots < self._filas
+        ), "Demanat més objectes comparat que disponibles."
         # Comprova si ja existeix la matriu amb les puntuacions i si no la
         # càlcula.
-        if self._scores_top_popular_items is None or self._min_vots != min_vots:
-            self._min_vots = min_vots
+        if self._scores_top_popular_items is None:
             self._score_top_popular_items()
         logging.debug("Retornant resultat.")
         # Agafa les puntuacions de les columnes no valorades pel usuari donat
         # i les ordena de major a menor puntuació, retornant l'objecte Data
         # corresponent i la puntuació que té, per després poder obtenir el
         # element al que es refereix.
-        return sorted(
-            [
-                (self._elementos[0][i], self._scores_top_popular_items[0, i])
-                for i in self._scores_top_popular_items.nonzero()[1]
-                if i not in list(self._valoraciones.getrow(usuario).nonzero()[1])
-            ],
-            key=lambda x: x[1],
-            reverse=True,
-        )
+        return self._scores_top_popular_items
 
     def _similitud_other_users_also(
         self, usuario: lil_matrix, posicio: int
@@ -240,7 +251,7 @@ class Dataset(metaclass=ABCMeta):
         # Retona el càcul de les similitus ordenades de major a menor.
         return sorted(similitudes, key=lambda x: x[1], reverse=True)
 
-    def other_users_also(self, k: int, usuario: int) -> List[Tuple[Data, float]]:
+    def other_users_also(self, usuario: int) -> List[Tuple[Data, float]]:
         """
         Càlcula i genera una llista ordenada (de més a menys) dels elements
         que més puntuació tenen, basat en les valoracions dels usuaris més
@@ -248,9 +259,6 @@ class Dataset(metaclass=ABCMeta):
 
         Parameters
         ----------
-        k : int
-            Nombre de usuaris més similars que s'hagafen per fer el càlcul dels
-            scores dels elements.
         usuario : int
             Indicador de la fila del usuari a quí es recomanarà els elements,
             no es recomanen els elelents ja valorats per aquest.
@@ -263,18 +271,24 @@ class Dataset(metaclass=ABCMeta):
 
         """
         logging.debug(
-            "Càlcul 'other_users_also' amb k: %s i usuari: %s.", k, usuario,
+            "Càlcul 'other_users_also' amb k: %s i usuari: %s.",
+            self._k_usuaris,
+            usuario,
         )
         # Comprobació de que els arguments de la funció están dins del límit
         # del dataset i evitar errors no controlats.
         assert 0 <= usuario < self._filas, "Usuari fora de rang."
-        assert 0 < k < self._filas, "Demanat més objectes comparats que disponibles."
+        assert (
+            0 < self._k_usuaris < self._filas
+        ), "Demanat més objectes comparats que disponibles."
         # Obté la lil_matrix unidimensional del usuari, per facilitar els
         # càlcus.
         user_u = self._valoraciones.getrow(usuario)
         # Càlcula les similituds entre tots els usuaris i l'usuari demanat i
         # agafa els k amb mayor similitud (k primers).
-        k_similars = self._similitud_other_users_also(user_u, usuario)[:k]
+        k_similars = self._similitud_other_users_also(user_u, usuario)[
+            : self._k_usuaris
+        ]
         scores = lil_matrix((1, self._columnas))
         # Càlcula la mitja de les valoracions del k més similars usuaris
         # (ignorant les valoracions amb 0) i les afegeix a la llista de
@@ -301,15 +315,7 @@ class Dataset(metaclass=ABCMeta):
         # i les ordena de major a menor puntuació, retornant l'objecte Data
         # corresponent i la puntuació que té, per després poder obtenir el
         # element al que es refereix.
-        return sorted(
-            [
-                (self._elementos[0][i], scores[0, i])
-                for i in scores.nonzero()[1]
-                if i not in list(user_u.nonzero()[1])
-            ],
-            key=lambda x: x[1],
-            reverse=True,
-        )
+        return scores
 
     def _tfidf_matrix(self):
         item_features = [
@@ -323,29 +329,16 @@ class Dataset(metaclass=ABCMeta):
         valoraciones = self._valoraciones.getrow(usuari).toarray()
         return valoraciones.dot(tfidf_matrix) / valoraciones.sum()
 
-    def _similitud(self, usuari):
+    def because_you_liked(self, usuario: int):
         tfidf_matrix = self._tfidf_matrix()
-        perfil_usuari = self._perfil_usuari(usuari, tfidf_matrix)
+        perfil_usuari = self._perfil_usuari(usuario, tfidf_matrix)
         tfidf_matrix = tfidf_matrix.reshape(
             (tfidf_matrix.shape[1], tfidf_matrix.shape[0])
         )
         puntuaciones = perfil_usuari.dot(tfidf_matrix)
         p = np.sqrt(np.square(perfil_usuari).sum())
         sumatorio = np.sqrt((np.square(tfidf_matrix)).sum(0))
-        return puntuaciones / (p * sumatorio)
-
-    def because_you_liked(self, usuari: int):
-        user_u = self._valoraciones.getrow(usuari)
-        puntuaciones = self._similitud(usuari)
-        return sorted(
-            [
-                (self._elementos[0][i], puntuaciones[i][0])
-                for i in puntuaciones.nonzero()[0]
-                if i not in list(user_u.nonzero()[1])
-            ],
-            key=lambda x: x[1],
-            reverse=True,
-        )
+        return puntuaciones / (p * sumatorio) * self._max_pun
 
     @abstractmethod
     def read_data(self):
@@ -446,3 +439,13 @@ class Dataset(metaclass=ABCMeta):
             self._columnas = pickle.load(fitxer_7)
             self._scores_top_popular_items = pickle.load(fitxer_8)
             self._min_vots = pickle.load(fitxer_9)
+
+    def to_data_object(self, scores: lil_matrix, usuario: int):
+        return [
+            (self._elementos[0][i], scores[0, i])
+            for i in scores.nonzero()[1]
+            if (
+                i not in list(self._valoraciones.getrow(usuario).nonzero()[1])
+                and not np.isnan(scores[0, i])
+            )
+        ]
