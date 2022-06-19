@@ -133,6 +133,17 @@ class Recomanacions(metaclass=ABCMeta):
                 self._save_pickle()
         return self._recomanacions[usuari][: self._n_recomanacions]
 
+    def del_dataset(self):
+        self._dataset.del_data()
+        del self._dataset
+        while len(self._recomanacions) > 0:
+            del self._recomanacions[0]
+        del self._recomanacions
+        return
+
+    def __del__(self):
+        logging.debug("Recom deleted from existence.")
+
 
 @dataclass
 class Recom_top_popular(Recomanacions):

@@ -107,6 +107,17 @@ class Avaluar:
                 print("\t" + co.cgreen("Score") + ": " + str(elem[1]))
             logging.info("Visualització finalitzada.")
 
+    def del_recomanacio(self):
+        self._recomanacio.del_dataset()
+        del self._recomanacio
+        while len(self._resultat) > 0:
+            del self._resultat[0]
+        del self._resultat
+        return
+
+    def __del__(self):
+        logging.debug("Avaluar deleted from existence.")
+
 
 @dataclass
 class Avaluar_Test(Avaluar):
@@ -192,7 +203,7 @@ class Avaluar_Test(Avaluar):
 
     def _mae(self, resultats: lil_matrix, test_u: lil_matrix):
         resultats = resultats[:, self._n :]
-        test_u = test_u[:, self._n :]
+        test_u = lil_matrix(test_u[:, self._n :])
         con = test_u != 0
         return (np.abs(resultats[con] - test_u[con])).sum() / (
             (test_u[con]).count_nonzero()

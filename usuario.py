@@ -4,6 +4,7 @@ Created on Wed Apr 20 13:01:16 2022
 @author: Joel Tapia Salvador (1638962) i Aksel Serret Llopis ()
 """
 from dataclasses import dataclass, field
+import logging
 from typing import List, Dict
 
 
@@ -52,3 +53,6 @@ class Usuari:
 
         """
         return self._gustos
+
+    def __del__(self):
+        logging.debug("User deleted from existence.")

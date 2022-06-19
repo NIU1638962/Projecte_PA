@@ -5,6 +5,7 @@ Created on Wed Apr 20 13:00:59 2022
 """
 
 from dataclasses import dataclass, field
+import logging
 from typing import List, Dict
 from abc import ABCMeta, abstractclassmethod
 import console_messages as co
@@ -97,6 +98,9 @@ class Data(metaclass=ABCMeta):
     @abstractclassmethod
     def caract_to_str(self) -> str:
         raise NotImplementedError
+
+    def __del__(self):
+        logging.debug("Data deleted from existence.")
 
 
 @dataclass

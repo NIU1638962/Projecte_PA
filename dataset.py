@@ -350,7 +350,10 @@ class Dataset(metaclass=ABCMeta):
         puntuaciones = perfil_usuari.dot(tfidf_matrix)
         p = np.sqrt(np.square(perfil_usuari).sum())
         sumatorio = np.sqrt((np.square(tfidf_matrix)).sum(0))
-        return puntuaciones / (p * sumatorio) * self._max_pun
+        pun = puntuaciones / (p * sumatorio) * self._max_pun
+        con = np.isnan(pun)
+        pun[con] = 0
+        return lil_matrix(pun)
 
     @abstractmethod
     def read_data(self):
@@ -461,3 +464,17 @@ class Dataset(metaclass=ABCMeta):
                 and not np.isnan(scores[0, i])
             )
         ]
+
+    def del_data(self):
+        for i in range(self._columnas):
+            del self._elementos[2][self._elementos[0][i].identificador]
+            del self._elementos[1][self._elementos[0][i].titol]
+            del self._elementos[0][i]
+        for i in range(self._filas):
+            del self._usuarios[1][self._usuarios[0][i].nom]
+            del self._usuarios[0][i]
+        del self._valoraciones
+        return
+
+    def __del__(self):
+        logging.debug("Dataset deleted from existence.")
