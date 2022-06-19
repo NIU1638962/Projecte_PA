@@ -177,6 +177,7 @@ class BoardGames(Dataset):
                             # També s'indexa al usuari pel seu nom d'usuari
                             self._usuarios[1][row[2]] = self._usuarios[0][self._filas]
                             if self._valoraciones is None:
+                                logging.debug("Valoracions is None.")
                                 # Sí es el primer usuari en ser llef¡git es
                                 # crea una lil_matrix amb la quantitat de
                                 # columnes igual al nombre d'elements que s'han

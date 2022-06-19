@@ -149,6 +149,7 @@ class Recomanador:
                     print(co.clblue("Sortint del menú..."))
                     self._opcio_dataset = None
                     self._opcio_recomanacio = None
+                    self._avaluar = None
                     logging.debug(
                         "Opció dataset i opcio recomanacio cleared.\n\t%s\n\t%s",
                         self._opcio_dataset,
@@ -193,10 +194,13 @@ class Recomanador:
             if self._usuari == "":
                 print(co.clblue("Sortint de selecció d'usuari..."))
                 self._opcio_recomanacio = None
+                del self._avaluar
+                self._avaluar = None
                 self._usuari = None
                 logging.debug(
-                    "Opcio recoamanacio i usuari cleared, sortint de selecció d'usuari.\n\t%s\n\t%s",
+                    "Opcio recomanacio, avaluar i usuari cleared, sortint de selecció d'usuari.\n\t%s\n\t%s\n\t%s",
                     self._opcio_recomanacio,
+                    self._avaluar,
                     self._usuari,
                 )
                 return

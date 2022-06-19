@@ -47,11 +47,13 @@ class Dataset(metaclass=ABCMeta):
         "min_vots.dat",
     )
 
-    def inicia(self, n, theta, n_recomanacions):
+    def inicia(self, n, opcio_recomanacio, theta, n_recomanacions):
         self._names_files_pickle = tuple(
             i[:-4]
             + "_"
             + str(n)
+            + "_"
+            + str(opcio_recomanacio)
             + "_"
             + str(theta)
             + "_"

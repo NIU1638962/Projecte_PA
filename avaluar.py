@@ -84,6 +84,7 @@ class Avaluar:
             )
         self._recomanacio.inicia(
             self._n,
+            self._opcio_recomanacio,
             self._theta / self._recomanacio.max_pun,
             min_vots,
             k_usuaris,

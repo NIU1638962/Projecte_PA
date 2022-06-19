@@ -143,6 +143,7 @@ class Pelicules(Dataset):
                         if row[0] not in [
                             usuari.nom for usuari in self._usuarios[0].values()
                         ]:
+                            logging.debug("Not in.")
                             # Si l'usuari o ha fet una valoració préviament es
                             # crea un objecte Usuari, i s'indexa per a la fila
                             # que ocuparà en la matriu de  valoracions a aquest
@@ -151,12 +152,14 @@ class Pelicules(Dataset):
                             # També s'indexa al usuari pel seu nom d'usuari.
                             self._usuarios[1][row[0]] = self._usuarios[0][self._filas]
                             if self._valoraciones is None:
-                                # Sí es el primer usuari en ser llef¡git es
+                                logging.debug("Valoracions is None.")
+                                # Sí es el primer usuari en ser afegit es
                                 # crea una lil_matrix amb la quantitat de
                                 # columnes igual al nombre d'elements que s'han
                                 # enmagatzemat previament.
                                 self._valoraciones = lil_matrix((1, self._columnas))
                             else:
+                                logging.debug("Valoracions is not None.")
                                 # Si no s'afegeix la valoració a una nova fila
                                 # de la matriu de valoracions.
                                 self._valoraciones.resize(
@@ -204,7 +207,7 @@ class Pelicules(Dataset):
             type_error = str(exc_tuple[0]).split()[1][:-1]
             message = str(exc_tuple[1])
             logging.error(
-                "S'ha parat l'excució, error:\n\t%s: %s\n Dades execució:\n\t%s \n\t%s \n\t%s",
+                "S'ha parat l'excució, error:\n\t%s: %s\n Dades execució:\n\tRow: %s \n\tFilas: %s \n\tColumnas: %s",
                 type_error,
                 message,
                 row,
