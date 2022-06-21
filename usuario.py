@@ -55,4 +55,12 @@ class Usuari:
         return self._gustos
 
     def __del__(self):
+        """
+        Per grabar al log d'execució si l'objecte s'ha eliminat.
+
+        Returns
+        -------
+        None.
+
+        """
         logging.debug("User deleted from existence.")

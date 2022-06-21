@@ -1,0 +1,94 @@
+GAMES
+	[0]BGGId			BoardGameGeek game ID
+	[1]Name			Name of game
+	[2]Description		Description, stripped of punctuation and lemmatized
+	[3]YearPublished	First year game published
+	[4]GameWeight		Game difficulty/complexity
+	[5]AvgRating		Average user rating for game
+	[6]BayesAvgRating	Bayes weighted average for game (x # of average reviews applied)
+	[7]StdDev		Standard deviation of Bayes Avg
+	[8]MinPlayers		Minimum number of players
+	[9]MaxPlayers		Maximun number of players
+	[10]ComAgeRec		Community's recommended age minimum
+	[11]LanguageEase	Language requirement
+	[12]BestPlayers		Community voted best player count
+	[13]GoodPlayers		List of community voted good plater counts
+	[14]NumOwned		Number of users who own this game
+	[15]NumWant		Number of users who want this game
+	[16]NumWish		Number of users who wishlisted this game
+	[17]NumWeightVotes	? Unknown
+	[18]MfgPlayTime		Manufacturer Stated Play Time
+	[19]ComMinPlaytime	Community minimum play time
+	[20]ComMaxPlaytime	Community maximum play time
+	[21]MfgAgeRec		Manufacturer Age Recommendation
+	[22]NumUserRatings	Number of user ratings
+	[23]NumComments		Number of user comments
+	[24]NumAlternates	Number of alternate versions
+	[25]NumExpansions	Number of expansions
+	[26]NumImplementations	Number of implementations
+	[27]IsReimplementation	Binary - Is this listing a reimplementation? 
+	[28]Family		Game family
+	[29]Kickstarted		Binary - Is this a kickstarter?
+	[30]ImagePath		Image http:// path
+	[31]Rank:boardgame	Rank for boardgames overall
+	[32]Rank:strategygames	Rank in strategy games
+	[33]Rank:abstracts	Rank in abstracts
+	[34]Rank:familygames	Rank in family games
+	[35]Rank:thematic	Rank in thematic
+	[36]Rank:cgs		Rank in card games
+	[37]Rank:wargames	Rank in war games
+	[38]Rank:partygames	Rank in party games
+	[39]Rank:childrensgames	Rank in children's games
+	[40]Cat:Thematic	Binary is in Thematic category
+	[41]Cat:Strategy	Binary is in Strategy category
+	[42]Cat:War		Binary is in War category
+	[43]Cat:Family		Binary is in Family category
+	[44]Cat:CGS		Binary is in Card Games category
+	[45]Cat:Abstract	Binary is in Abstract category
+	[46]Cat:Party		Binary is in Party category
+	[47]Cat:Childrens	Binary is in Childrens category
+
+
+MECHANICS
+	BGGId			BoardGameGeek game ID	
+	Remaining headers are various mechanics with binary flag
+
+
+THEMES
+	BGGId			BoardGameGeek game ID
+	Remaining headers are various themes with binary flag
+
+
+SUBCATEGORIES
+	BGGId			BoardGameGeek game ID
+	Remaining headers are various subcategories with binary flag
+
+
+ARTISTS_REDUCED
+	BGGId			BoardGameGeek game ID
+	Low-Exp Artist		Indicates game has an unlisted artist with <= 3 entries
+	Remaining headers are various artists with binary flag
+
+
+DESIGNERS_REDUCED
+	BGGId			BoardGameGeek game ID
+	Low-Exp Designer	Indicates game has an unlisted designer with <= 3 entries
+	Remaining headers are various subcategories with binary flag
+
+
+PUBLISHERS_REDUCED
+	BGGId			BoardGameGeek game ID
+	Low-Exp Publisher	Indicated games has an unlisted publisher with <= 3 entries
+	Remaining headers are various subcategories with binary flag
+
+
+USER_RATINGS
+	BGGId			BoardGameGeek game ID	
+	Rating			Raw rating given by user
+	Username		User giving rating
+
+
+RATINGS_DISTRIBUTION
+	BGGId			BoardGameGeek game ID
+	Numbers 0.0-10.0	Number of ratings per rating header
+	total_ratings		Total number of ratings for game

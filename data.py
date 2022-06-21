@@ -100,6 +100,14 @@ class Data(metaclass=ABCMeta):
         raise NotImplementedError
 
     def __del__(self):
+        """
+        Per grabar al log d'execució si l'objecte s'ha eliminat.
+
+        Returns
+        -------
+        None.
+
+        """
         logging.debug("Data deleted from existence.")
 
 

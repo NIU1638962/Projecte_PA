@@ -37,54 +37,71 @@ class Recomanador:
     _usuari: int = field(init=False, default=None)
 
     def recomanador(self):
-        # try:
-        while self._pickle is None:
-            logging.info("S'ha iniciat el programa recomanació.")
-            con_input = input("Inicialitzar a partir de fitxer binari S/N: ")
-            if con_input in "Ss":
-                self._pickle = True
-            elif con_input in "Nn":
-                self._pickle = False
-            else:
-                print(co.cdred('Opció ha de ser "S" o "N".'))
-                logging.warning('Opció ha de ser "S" o "N".')
-        while True:
-            try:
-                self._mode()
-            except AssertionError as message:
-                print(co.cdred(str(message)[7:]))
-                continue
-            else:
-                break
-        # except:
-        #     logging.error(
-        #         "S'ha terminat el programa recomanació. \n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s",
-        #         self._pickle,
-        #         self._opcio_mode,
-        #         self._opcio_dataset,
-        #         self._opcio_recomanacio,
-        #         self._avaluar,
-        #         self._usuari,
-        #     )
-        #     exc_tuple = sys.exc_info()
-        #     type_error = str(exc_tuple[0]).split()[1][:-1]
-        #     message = str(exc_tuple[1])
-        #     print(
-        #         co.cdred("An error has occured.")
-        #         + "\n\t"
-        #         + co.eul("Error Type:")
-        #         + " \n\t\t"
-        #         + type_error
-        #         + "\n\t"
-        #         + co.eul("Error message:")
-        #         + " \n\t\t"
-        #         + message
-        #     )
-        #     traceback.print_exc()
-        # else:
-        logging.info("S'ha finalitzat correctament el programa recomanació.")
+        """
+        S'encarrega de gestionar les impresions per pantalla i inputs.
+
+        Returns
+        -------
+        None.
+
+        """
+        logging.info("S'ha iniciat el recomanador.")
+        try:
+            while self._pickle is None:
+                logging.info("S'ha iniciat el programa recomanació.")
+                con_input = input("Inicialitzar a partir de fitxer binari S/N: ")
+                if con_input in "Ss":
+                    self._pickle = True
+                elif con_input in "Nn":
+                    self._pickle = False
+                else:
+                    print(co.cdred('Opció ha de ser "S" o "N".'))
+                    logging.warning('Opció ha de ser "S" o "N".')
+            while True:
+                try:
+                    self._mode()
+                except AssertionError as message:
+                    print(co.cdred(str(message)[7:]))
+                    continue
+                else:
+                    break
+        except:
+            logging.error(
+                "S'ha terminat el programa recomanació. \n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s",
+                self._pickle,
+                self._opcio_mode,
+                self._opcio_dataset,
+                self._opcio_recomanacio,
+                self._avaluar,
+                self._usuari,
+            )
+            exc_tuple = sys.exc_info()
+            type_error = str(exc_tuple[0]).split()[1][:-1]
+            message = str(exc_tuple[1])
+            print(
+                co.cdred("An error has occured.")
+                + "\n\t"
+                + co.eul("Error Type:")
+                + " \n\t\t"
+                + type_error
+                + "\n\t"
+                + co.eul("Error message:")
+                + " \n\t\t"
+                + message
+            )
+            traceback.print_exc()
+        else:
+            logging.info("S'ha finalitzat correctament el programa recomanació.")
 
     def _mode(self):
+        """
+        S'encarrga de gestionar la selecció del mode d'execució.
+
+        Returns
+        -------
+        None.
+
+        """
         while True:
             try:
                 self._menu_select_mode()
@@ -117,6 +134,14 @@ class Recomanador:
                     )
 
     def _dataset(self):
+        """
+        S'encarerga de gestionar la selecció del tipus de dataset.
+
+        Returns
+        -------
+        None.
+
+        """
         while True:
             self._menu_select_dataset()
             try:
@@ -141,6 +166,14 @@ class Recomanador:
                 self._recom()
 
     def _recom(self):
+        """
+        S'encarrega de gestionar la selecció del tipus de recomanació.
+
+        Returns
+        -------
+        None.
+
+        """
         while True:
             self._menu_select_recomanacio()
             try:
@@ -183,6 +216,14 @@ class Recomanador:
                 self._usr()
 
     def _usr(self):
+        """
+        S'encarrega de la selecció d'usuari.
+
+        Returns
+        -------
+        None.
+
+        """
         while True:
             self._usuari = input(
                 co.cgray(
@@ -213,6 +254,14 @@ class Recomanador:
                 self._avaluar.visualitza(self._avaluar.recomana(self._usuari))
 
     def _menu_select_mode(self):
+        """
+        Imprimeix per pantalla el menu de selecció de mode.
+
+        Returns
+        -------
+        None.
+
+        """
         logging.debug("Menú selecció mode.")
         print("\n")
         print(co.cpurple("MENÚ SELECCIÓ MODE"))
@@ -221,6 +270,14 @@ class Recomanador:
         print(co.cgreen('Sortir del menú: "S".'))
 
     def _menu_select_dataset(self):
+        """
+        Imprimeix per pantalla el menú de selecció de dataset.
+
+        Returns
+        -------
+        None.
+
+        """
         logging.debug("Menú selecció dataset.")
         print("\n")
         print(co.cpurple("MENÚ SELECCIÓ DATA SET"))
@@ -229,6 +286,14 @@ class Recomanador:
         print(co.cgreen('Sortir del menú: "S".'))
 
     def _menu_select_recomanacio(self):
+        """
+        Imprimeix per pantalla el menú de selecció de tipus de recomanació.
+
+        Returns
+        -------
+        None.
+
+        """
         logging.debug("Menú selecció recomanació.")
         print("\n")
         print(co.cpurple("MENÚ SELECCIÓ MÉTODE RECOMANACIÓ"))
@@ -238,6 +303,16 @@ class Recomanador:
         print(co.cgreen('Sortir del menú: "S".'))
 
     def del_avaluar(self):
+        """
+        Elimina totes les referecies als objectes usuaris, data, dataset,
+        recomanacions i avaluar de la selecció anterior.
+
+        Returns
+        -------
+        None.
+
+        """
+        logging.info("Iniciant eliminació.")
         if self._avaluar is not None:
             self._avaluar.del_recomanacio()
             del self._avaluar

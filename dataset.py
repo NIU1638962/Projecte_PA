@@ -47,7 +47,7 @@ class Dataset(metaclass=ABCMeta):
         "min_vots.dat",
     )
 
-    def inicia(self, n, opcio_recomanacio, theta, n_recomanacions):
+    def inicia(self, n: int, opcio_recomanacio: int, theta: int, n_recomanacions: int):
         self._names_files_pickle = tuple(
             i[:-4]
             + "_"
@@ -124,7 +124,7 @@ class Dataset(metaclass=ABCMeta):
         """
         return self._columnas
 
-    def generate_training_set(self, n_first):
+    def generate_training_set(self, n_first: int) -> lil_matrix:
         temp = self._valoraciones.copy()
         self._valoraciones = lil_matrix((self._filas, self._columnas))
         self._valoraciones[:, :n_first] = temp[:, :n_first]
@@ -180,10 +180,9 @@ class Dataset(metaclass=ABCMeta):
 
     def top_popular_items(self, usuario: int) -> List[Tuple[Data, float]]:
         """
-        Càlcula i genera una llista ordenada (de més a menys) dels elements
-        que més puntuació tenen, basat en les valoracions dels altres usuaris,
-        ignorat les ja valorades pel usuari donat i les que tenen menys
-        valoracions que min_vots.
+        Càlcula les puntuacions dels elements, basat en les valoracions dels
+        altres usuaris, ignorat les ja valorades pel usuari donat i les que
+        tenen menys valoracions que min_vots.
 
         Parameters
         ----------
@@ -196,9 +195,8 @@ class Dataset(metaclass=ABCMeta):
 
         Returns
         -------
-        List[Tuple[Data, float]]
-            Llista ordenada dels elements per score, referencia al element i la
-            score en questió.
+        lil_matrix
+            Matriu resultat dels càlculs de recomanació amb el métode pertinent.
 
         """
         logging.debug(
@@ -263,11 +261,11 @@ class Dataset(metaclass=ABCMeta):
         # Retona el càcul de les similitus ordenades de major a menor.
         return sorted(similitudes, key=lambda x: x[1], reverse=True)
 
-    def other_users_also(self, usuario: int) -> List[Tuple[Data, float]]:
+    def other_users_also(self, usuario: int) -> lil_matrix:
         """
-        Càlcula i genera una llista ordenada (de més a menys) dels elements
-        que més puntuació tenen, basat en les valoracions dels usuaris més
-        similars al usuari donat, ignorat les ja valorades pel usuari donat.
+        Càlcula les puntuacions dels elements, basat en les valoracions dels
+        usuaris més similars al usuari donat, ignorat les ja valorades pel
+        usuari donat.
 
         Parameters
         ----------
@@ -277,9 +275,8 @@ class Dataset(metaclass=ABCMeta):
 
         Returns
         -------
-        List[Tuple[Data, float]]
-           Llista ordenada dels elements per score, referencia al element i la
-           score en questió.
+        lil_matrix
+           Matriu resultat dels càlculs de recomanació amb el métode pertinent.
 
         """
         logging.debug(
@@ -329,7 +326,17 @@ class Dataset(metaclass=ABCMeta):
         # element al que es refereix.
         return scores
 
-    def _tfidf_matrix(self):
+    def _tfidf_matrix(self) -> np.array:
+        """
+        Calcula la matriu de la representació Term Frequency i Inverse Data
+        Frequency.
+
+        Returns
+        -------
+        tfidf_matrix : TYPE
+            Matriu amb la representació tf-idf.
+
+        """
         item_features = [
             self._elementos[0][i].caract_to_str() for i in range(self._columnas)
         ]
@@ -337,11 +344,46 @@ class Dataset(metaclass=ABCMeta):
         tfidf_matrix = tfidf.fit_transform(item_features).toarray()
         return tfidf_matrix
 
-    def _perfil_usuari(self, usuari, tfidf_matrix):
+    def _perfil_usuari(self, usuari: int, tfidf_matrix: np.array) -> np.array:
+        """
+        Càlcula el prefil de l'usuari en questió, atrvés de la matriu tf-idf i
+        les valoracions del usuari.
+
+        Parameters
+        ----------
+        usuari : int
+            Indicador de la fila del usuari a quí es recomanarà els elements,
+            no es recomanen els elelents ja valorats per aquest.
+        tfidf_matrix : np.array
+            Matriu amb la representació tf-idf.
+
+        Returns
+        -------
+        np.array
+            Array numpu amn el perfil de l'usuari per a cada película.
+
+        """
         valoraciones = self._valoraciones.getrow(usuari).toarray()
         return valoraciones.dot(tfidf_matrix) / valoraciones.sum()
 
-    def because_you_liked(self, usuario: int):
+    def because_you_liked(self, usuario: int) -> lil_matrix:
+        """
+        Càlcula les puntuacions dels elements, basat en les valoracions dels
+        ja fetes pelusuari tenint en compte les característiques d'aquestes,
+        ignorat les ja valorades pel usuari donat.
+
+        Parameters
+        ----------
+        usuario : int
+            Indicador de la fila del usuari a quí es recomanarà els elements,
+            no es recomanen els elelents ja valorats per aquest.
+
+        Returns
+        -------
+        lil_matrix
+            Matriu resultat dels càlculs de recomanació amb el métode pertinent.
+
+        """
         tfidf_matrix = self._tfidf_matrix()
         perfil_usuari = self._perfil_usuari(usuario, tfidf_matrix)
         tfidf_matrix = tfidf_matrix.reshape(
@@ -376,7 +418,7 @@ class Dataset(metaclass=ABCMeta):
 
     def _save_pickle(self):
         """
-        Guarda els atributs de la clase en un arxiu binari de lectura més
+        Guarda els atributs de la clase en arxius binaris de lectura més
         ràpida que els arxius csv.
 
         Returns
@@ -417,7 +459,7 @@ class Dataset(metaclass=ABCMeta):
 
     def _load_pickle(self):
         """
-        Carrega els atributs de la clase des de un arxiu binari de lectura més
+        Carrega els atributs de la clase des de arxius binaris de lectura més
         ràpida que els arxius csv.
 
         Returns
@@ -455,7 +497,9 @@ class Dataset(metaclass=ABCMeta):
             self._scores_top_popular_items = pickle.load(fitxer_8)
             self._min_vots = pickle.load(fitxer_9)
 
-    def to_data_object(self, scores: lil_matrix, usuario: int):
+    def to_data_object(
+        self, scores: lil_matrix, usuario: int
+    ) -> List[Tuple[Data, float]]:
         return [
             (self._elementos[0][i], scores[0, i])
             for i in scores.nonzero()[1]
@@ -466,6 +510,15 @@ class Dataset(metaclass=ABCMeta):
         ]
 
     def del_data(self):
+        """
+        Elimina totes les referecies als objectes usuaris i data de la selecció
+        anterior.
+
+        Returns
+        -------
+        None.
+
+        """
         for i in range(self._columnas):
             del self._elementos[2][self._elementos[0][i].identificador]
             del self._elementos[1][self._elementos[0][i].titol]
@@ -477,4 +530,12 @@ class Dataset(metaclass=ABCMeta):
         return
 
     def __del__(self):
+        """
+        Per grabar al log d'execució si l'objecte s'ha eliminat.
+
+        Returns
+        -------
+        None.
+
+        """
         logging.debug("Dataset deleted from existence.")
